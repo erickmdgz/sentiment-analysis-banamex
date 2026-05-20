@@ -1,0 +1,74 @@
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+.secrets/
+*credentials*
+*secret*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Node / JS
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+.cache/
+.vite/
+coverage/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Rust
+target/
+
+# Go
+bin/
+*.test
+*.out
+
+# IDEs (descomenta selectivamente si aplica)
+# .idea/
+# .vscode/
+*.swp
+*.swo
+
+# Temporales
+tmp/
+temp/
+
+# Datos crudos y derivados del reto (pesados / sensibles, no versionar)
+data/raw/
+data/processed/
+data/models/
+data/cache/
+
+# Entregable original del reto: contiene los corpora crudos dentro del ZIP.
+# Se conserva LOCAL como respaldo inmutable, pero NO se versiona ni sube a remote.
+docs/originales/
+
+# Bases de datos y modelos generados
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.joblib
+*.gz
