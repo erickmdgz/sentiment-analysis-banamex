@@ -39,3 +39,31 @@ Formato sugerido por entrada:
 **Estado:** Aplicado. No bloquea ninguna sesión. CLAUDE.md del proyecto sigue diciendo "el .zip original... conservar" — interpretado como conservar en disco local, no en git.
 
 ---
+
+## 2026-05-21 — M1: firma de `parse_tsv` vs. necesidad de reportar inválidas
+
+**Decisión/contrato afectado:** `02_M1_datos.md` (Entregables y Tests requeridos §13.5–§13.7) y `01_contratos_compartidos.md §4` (`VerbalizationRow`).
+
+**Lo que el contrato dice:** El plan M1 declara la firma `core.parser.parse_tsv(path: Path) -> Iterator[VerbalizationRow]`, pero al mismo tiempo exige que el parser **reporte** filas inválidas (menos de 6 columnas, `nps_rate` fuera de rango, `nps_group` con typo, etc.) y que el loader las cuente en `LoadReport.rows_invalid`.
+
+**Lo que la sesión hizo:** El parser yield-ea `ParsedRow` (dataclass interno con `is_valid`, `error`, `row: VerbalizationRow | None`, `response_date_iso`, `verbatim_clean`). Las filas válidas exponen su `VerbalizationRow` en `.row`; las inválidas llevan motivo. El loader consume `ParsedRow` directamente. El DTO público `VerbalizationRow` (frozen en `schemas.py`) no se tocó.
+
+**Razón:** Yield-ear sólo `VerbalizationRow` obligaría a perder información para los conteos del `LoadReport` o a usar un canal lateral (logging) para "reportar". `ParsedRow` mantiene el contrato del DTO público intacto y hace contables las inválidas. Es además lo que la propia spec sugiere implícitamente en su ejemplo `_normalize_row(row, row_num)`.
+
+**Resolución del usuario:** _(pendiente)_
+
+---
+
+## 2026-05-21 — M1: `LoadReport.already_processed` no existe en el DTO congelado
+
+**Decisión/contrato afectado:** `02_M1_datos.md` (sección "LoadReport") y `01_contratos_compartidos.md §4` (`LoadReport`).
+
+**Lo que el contrato dice:** El plan M1 dice "Adicionalmente expone una propiedad `already_processed: bool` (no en el schema persistido, sólo en el DTO) derivada de la existencia previa del `sha256`." Pero el DTO en `core/src/core/schemas.py` (stub congelado) **no** declara ese campo.
+
+**Lo que la sesión hizo:** No se modificó el DTO. El caso "archivo ya procesado" es detectable por el caller con `report.rows_inserted == 0 and report.rows_duplicated == report.rows_total`. Los tests de loader verifican esa condición en lugar de `already_processed=True`.
+
+**Razón:** El prompt de la sesión dijo "los stubs ya existen ... respétalos como contrato congelado". Modificar `schemas.py` para agregar el campo violaría esa instrucción. La invariante semántica se preserva por inferencia.
+
+**Resolución del usuario:** _(pendiente)_
+
+---
