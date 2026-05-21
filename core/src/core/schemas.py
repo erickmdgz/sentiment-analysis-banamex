@@ -34,6 +34,7 @@ class LoadReport(BaseModel):
     branches_detected: list[str]
     date_range: tuple[str, str]  # (min_date, max_date)
     months_available: list[str]  # ["2025-01", "2025-02", ...]
+    already_processed: bool = False  # True si el sha256 del archivo ya existía
 
 
 class BranchTargetRow(BaseModel):

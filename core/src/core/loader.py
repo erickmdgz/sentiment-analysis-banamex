@@ -150,6 +150,7 @@ def _build_report_for_existing(conn: Connection, file_id: int, filename: str) ->
         branches_detected=branches,
         date_range=date_range,
         months_available=months,
+        already_processed=True,
     )
 
 
@@ -242,6 +243,7 @@ def load_file(path: Path) -> LoadReport:
         branches_detected=branches_detected,
         date_range=date_range,
         months_available=months,
+        already_processed=False,
     )
 
 

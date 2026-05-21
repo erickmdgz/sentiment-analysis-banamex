@@ -63,11 +63,13 @@ def test_fixture_sample_se_carga_sin_errores(temp_db: Path, fixtures_dir: Path) 
 def test_cargar_mismo_archivo_dos_veces(temp_db: Path, fixtures_dir: Path) -> None:
     first = load_file(fixtures_dir / "sample.tsv")
     assert first.rows_inserted == 100
+    assert first.already_processed is False
 
     second = load_file(fixtures_dir / "sample.tsv")
     assert second.rows_total == 100
     assert second.rows_inserted == 0
     assert second.rows_duplicated == second.rows_total
+    assert second.already_processed is True
     # file_id es el mismo (no se duplica la fila en files)
     assert second.file_id == first.file_id
     engine = get_engine()
