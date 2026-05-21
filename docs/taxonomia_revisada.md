@@ -841,3 +841,200 @@ El rol Administrador existirá como representación POC dentro de la interfaz, c
 La lógica principal del sistema será:
 
 > Carga multisucursal incremental → validación → integración sin duplicados → consulta de objetivos internos → vista nacional YTD → comparación entre meses disponibles → ranking de sucursales → selección de sucursal → vista granular YTD → comparación mensual de sucursal → acciones sugeridas.
+
+---
+
+## Anexo — Árbol L1/L2/L3 (consumido por `engine.taxonomy.load_taxonomy`)
+
+Esta sección expande las 15 categorías raíz de §14 con subcategorías L2 y hojas L3.
+Es la fuente parseable por `engine.taxonomy.load_taxonomy()` (M2a). Formato fijo:
+
+- L1 = `#### N. **Nombre**`
+- L2 = `- **N.M Nombre**`
+- L3 = `    - N.M.K Nombre` (cuatro espacios de indentación)
+
+Cualquier cambio en estos códigos rompe contratos cruzados con M2a y M2b. Si una
+sesión cree que la jerarquía debe cambiar, anota en `plan_implementacion/contracts_issues.md`.
+
+#### 1. **Atención al cliente**
+
+- **1.1 Trato del personal**
+    - 1.1.1 Amabilidad y cortesía
+    - 1.1.2 Trato distante o grosero
+- **1.2 Calidad de la atención**
+    - 1.2.1 Atención general en sucursal
+    - 1.2.2 Trato al ofrecer productos o promociones
+- **1.3 Disponibilidad de personal**
+    - 1.3.1 Falta de personal disponible
+    - 1.3.2 Personal ausente del puesto
+- **1.4 Conocimiento del personal**
+    - 1.4.1 Asesoría correcta
+    - 1.4.2 Falta de conocimiento del producto
+- **1.5 Resolución de problemas**
+    - 1.5.1 Resolución efectiva
+    - 1.5.2 Falta de resolución
+
+#### 2. **Tiempos y operación**
+
+- **2.1 Tiempo de espera**
+    - 2.1.1 Espera larga reportada
+    - 2.1.2 Espera razonable o rápida
+- **2.2 Velocidad de atención**
+    - 2.2.1 Atención ágil
+    - 2.2.2 Atención lenta
+    - 2.2.3 Espera operativa en sucursal o ventanilla
+- **2.3 Gestión de turnos y filas**
+    - 2.3.1 No respetan turnos
+    - 2.3.2 Buena gestión de turnos
+
+#### 3. **Sucursal física**
+
+- **3.1 Limpieza e instalaciones**
+    - 3.1.1 Sucursal limpia y ordenada
+    - 3.1.2 Sucursal en mal estado
+- **3.2 Comodidad y mobiliario**
+    - 3.2.1 Mobiliario adecuado
+    - 3.2.2 Mobiliario insuficiente o incómodo
+- **3.3 Ubicación y accesibilidad**
+    - 3.3.1 Ubicación conveniente
+    - 3.3.2 Estacionamiento o accesibilidad limitada
+
+#### 4. **Cajeros automáticos**
+
+- **4.1 Disponibilidad de cajeros**
+    - 4.1.1 Cajeros disponibles
+    - 4.1.2 Cajeros fuera de servicio
+- **4.2 Fallos de cajeros**
+    - 4.2.1 Cajero retuvo tarjeta
+    - 4.2.2 Cajero no completó la operación
+- **4.3 Dispensación y servicios**
+    - 4.3.1 Falta de billetes
+    - 4.3.2 Diversidad de denominaciones
+- **4.4 Seguridad en cajeros**
+    - 4.4.1 Cajeros en zona segura
+    - 4.4.2 Inseguridad en cajeros
+
+#### 5. **Canales digitales**
+
+- **5.1 App móvil**
+    - 5.1.1 App funcional
+    - 5.1.2 Fallos de la app
+    - 5.1.3 Problemas con NetKey o token
+- **5.2 Banca por internet**
+    - 5.2.1 Portal funcional
+    - 5.2.2 Fallos del portal
+- **5.3 Centro de atención telefónica**
+    - 5.3.1 Atención telefónica resolutiva
+    - 5.3.2 Espera o desconexión en call center
+- **5.4 Chat y WhatsApp**
+    - 5.4.1 Chat resolutivo
+    - 5.4.2 Chat sin respuesta
+
+#### 6. **Productos**
+
+- **6.1 Tarjetas de crédito**
+    - 6.1.1 Beneficios de la tarjeta
+    - 6.1.2 Problemas con la tarjeta de crédito
+- **6.2 Tarjetas de débito**
+    - 6.2.1 Uso correcto de tarjeta de débito
+    - 6.2.2 Problemas con la tarjeta de débito
+- **6.3 Créditos**
+    - 6.3.1 Crédito aprobado o útil
+    - 6.3.2 Negativa o demora del crédito
+- **6.4 Cuentas e inversiones**
+    - 6.4.1 Buen rendimiento o servicio
+    - 6.4.2 Problemas con cuentas e inversiones
+- **6.5 Promociones y ofertas**
+    - 6.5.1 Promoción o producto con fricción
+    - 6.5.2 Promoción atractiva
+
+#### 7. **Operaciones transaccionales**
+
+- **7.1 Depósitos y retiros**
+    - 7.1.1 Depósito o retiro correcto
+    - 7.1.2 Problema con depósito o retiro
+- **7.2 Transferencias**
+    - 7.2.1 Transferencia exitosa
+    - 7.2.2 Transferencia con fallo o demora
+- **7.3 Pago de servicios**
+    - 7.3.1 Pago de servicios correcto
+    - 7.3.2 Problema con pago de servicios
+
+#### 8. **Costos**
+
+- **8.1 Comisiones**
+    - 8.1.1 Comisiones razonables
+    - 8.1.2 Comisiones altas o injustificadas
+- **8.2 Intereses**
+    - 8.2.1 Intereses razonables
+    - 8.2.2 Intereses altos
+- **8.3 Cobros inesperados**
+    - 8.3.1 Cobro no esperado
+    - 8.3.2 Cargo recurrente cuestionado
+
+#### 9. **Aclaraciones, quejas y fraude**
+
+- **9.1 Aclaraciones de cargos**
+    - 9.1.1 Aclaración resuelta
+    - 9.1.2 Aclaración pendiente
+- **9.2 Fraude y cargos no reconocidos**
+    - 9.2.1 Reporte de fraude atendido
+    - 9.2.2 Fraude no atendido
+- **9.3 Manejo de quejas**
+    - 9.3.1 Queja atendida
+    - 9.3.2 Queja no atendida
+
+#### 10. **Procesos y requisitos**
+
+- **10.1 Trámites y documentación**
+    - 10.1.1 Trámite ágil
+    - 10.1.2 Trámite demorado
+- **10.2 Apertura y cierre de productos**
+    - 10.2.1 Proceso de apertura fluido
+    - 10.2.2 Cierre de producto complicado
+- **10.3 Requisitos y procesos internos**
+    - 10.3.1 Requisitos claros
+    - 10.3.2 Requisitos excesivos
+    - 10.3.3 Proceso interno burocrático
+
+#### 11. **Programas y beneficios**
+
+- **11.1 Programa de puntos**
+    - 11.1.1 Puntos acumulados o canjeados
+    - 11.1.2 Problemas con puntos
+- **11.2 Beneficios y recompensas**
+    - 11.2.1 Beneficios bien aprovechados
+    - 11.2.2 Beneficios sin valor percibido
+
+#### 12. **Comunicación y notificaciones**
+
+- **12.1 Notificaciones recibidas**
+    - 12.1.1 Notificación útil
+    - 12.1.2 Notificación excesiva o spam
+- **12.2 Información proactiva**
+    - 12.2.1 Información clara
+    - 12.2.2 Falta de información
+
+#### 13. **Marca y confianza**
+
+- **13.1 Confianza institucional**
+    - 13.1.1 Banco confiable
+    - 13.1.2 Pérdida de confianza
+- **13.2 Reputación**
+    - 13.2.1 Buena reputación
+    - 13.2.2 Mala reputación
+
+#### 14. **Elogio o queja genérica sin tema específico**
+
+- **14.1 Elogio genérico**
+    - 14.1.1 Comentario positivo sin tema
+- **14.2 Queja genérica**
+    - 14.2.1 Comentario negativo sin tema
+
+#### 15. **Otros / No clasificable**
+
+- **15.1 Texto sin contenido temático**
+- **15.2 Texto incomprensible**
+- **15.3 Otros temas**
+    - 15.3.1 Tema fuera del banco
+- **15.4 No clasificable**
