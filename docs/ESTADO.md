@@ -10,7 +10,7 @@
 
 ## Etapa actual
 
-**Etapa 2 — Lista pero no lanzada.** Se esperan 2 sesiones paralelas: M2b (clasificador supervisado) y M4 (API FastAPI). Los worktrees deben recrearse desde main `da5958c` (los anteriores estaban en `d059973`, antes de los fixes de contrato M1 y la dep `jsonschema`).
+**Etapa 2 — Lista pero no lanzada.** Se esperan 2 sesiones paralelas: M2b (clasificador supervisado) y M4 (API FastAPI). Los worktrees ya están creados desde el main actual e incluyen los fixes de contrato M1 + la dep `jsonschema`. Para confirmar el estado: `git worktree list`.
 
 Plan de orquestación completo: `~/.claude/plans/nuestro-plan-de-implementaci-n-misty-walrus.md` (no se versiona — vive en config local de Claude).
 
@@ -27,10 +27,12 @@ Etapa 3   ⏸  M6 integración Docker + scripts + demo               (espera Eta
 ## Worktrees activos
 
 ```
-/Users/etegi/Documents/personal/sentiment-analysis-banamex  d059973 [main]
-/Users/etegi/Documents/personal/sentiment-wt-m2b            d059973 [feat/m2b-classifier]
-/Users/etegi/Documents/personal/sentiment-wt-m4             d059973 [feat/m4-api]
+sentiment-analysis-banamex/        [main]
+sentiment-wt-m2b/                  [feat/m2b-classifier]
+sentiment-wt-m4/                   [feat/m4-api]
 ```
+
+Los SHAs específicos se obtienen con `git worktree list`. Las ramas `feat/m2b-classifier` y `feat/m4-api` parten del último commit de main al momento de su creación.
 
 Convención: los worktrees viven **fuera** del repo principal (no pueden vivir adentro — git lo rechaza). Cuando se cierra un PR de un worktree, removerlo con `git worktree remove <path>` y eliminar la rama local con `git branch -D <branch>`.
 
