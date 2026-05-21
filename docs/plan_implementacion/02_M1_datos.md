@@ -11,7 +11,7 @@ Es el cimiento de datos de todo el sistema: si M1 falla o produce datos inconsis
 - [ ] Paquete `core/` instalable con `pip install -e ./core` desde la raíz del repo.
 - [ ] `core.db.init_schema()` aplica el SQL literal de `01_contratos_compartidos.md §2`.
 - [ ] `core.db.get_session()` factory de sesión SQLAlchemy 2.x sobre `data/processed/banamex.db`.
-- [ ] `core.parser.parse_tsv(path: Path) -> Iterator[VerbalizationRow]`.
+- [ ] `core.parser.parse_tsv(path: Path) -> Iterator[ParsedRow]`. `ParsedRow` es un dataclass interno de `core.parser` con campos `row_num`, `is_valid`, `error: str | None`, `row: VerbalizationRow | None`, `response_date_iso: str | None`, `verbatim_clean: str | None`. La firma original prometía `Iterator[VerbalizationRow]` pero el contrato también exigía contabilizar inválidas en `rows_invalid`; `ParsedRow` resuelve ambos requisitos sin filtrar silenciosamente. El DTO público `VerbalizationRow` (en `schemas.py`) no se modifica — sigue siendo el tipo expuesto en `ParsedRow.row` cuando `is_valid=True`.
 - [ ] `core.loader.load_file(path: Path) -> LoadReport` con dedup por `record_id`, cómputo de `sha256` del archivo y persistencia de filas válidas.
 - [ ] `core.targets.generate_all(seed=42)` siguiendo la regla del `00_decisiones_tecnicas.md §15`.
 - [ ] `core.targets.regenerate_for_branches(branch_ids: list[str])` para regeneración puntual.
@@ -65,13 +65,14 @@ core/
 
 ```python
 import csv
+from collections.abc import Iterator
 from pathlib import Path
 
-def parse_tsv(path: Path):
+def parse_tsv(path: Path) -> Iterator[ParsedRow]:
     with open(path, encoding='latin-1', newline='') as f:
         reader = csv.reader(f, delimiter='\t', quoting=csv.QUOTE_MINIMAL)
         for row_num, row in enumerate(reader, start=1):
-            yield _normalize_row(row, row_num)
+            yield _normalize_row(row, row_num)  # devuelve ParsedRow (válida o no)
 ```
 
 **Detección de filas inválidas**: se cuentan en `rows_invalid` (campo del `LoadReport`):
@@ -152,7 +153,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, future=True)
 
 `init_schema()` lee `schema.sql` y ejecuta cada statement con `engine.begin()`. Es idempotente: las sentencias `CREATE TABLE` no usan `IF NOT EXISTS` en el contrato de `§2`, así que `init_schema()` envuelve la ejecución en try/except por `OperationalError "already exists"` o, alternativamente, verifica con `sqlalchemy.inspect(engine).get_table_names()` antes de aplicar.
 
-**`LoadReport`**: incluye todos los campos del Pydantic definido en `01_contratos_compartidos.md §4`: `file_id`, `filename`, `rows_total`, `rows_inserted`, `rows_duplicated`, `rows_invalid`, `branches_detected`, `date_range` y `months_available`. Adicionalmente expone una propiedad `already_processed: bool` (no en el schema persistido, sólo en el DTO) derivada de la existencia previa del `sha256`.
+**`LoadReport`**: incluye todos los campos del Pydantic definido en `01_contratos_compartidos.md §4`: `file_id`, `filename`, `rows_total`, `rows_inserted`, `rows_duplicated`, `rows_invalid`, `branches_detected`, `date_range`, `months_available` y `already_processed: bool` (campo del DTO, no del schema persistido; lo pobla `load_file` con `True` cuando el `sha256` ya existía en `files`).
 
 ## Tests requeridos
 

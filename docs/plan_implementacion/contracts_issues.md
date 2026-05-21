@@ -80,30 +80,28 @@ Formato sugerido por entrada:
 
 ---
 
-## 2026-05-21 — M1: firma de `parse_tsv` vs. necesidad de reportar inválidas
+## 2026-05-21 — M1: firma de `parse_tsv` vs. necesidad de reportar inválidas (RESUELTO)
 
 **Decisión/contrato afectado:** `02_M1_datos.md` (Entregables y Tests requeridos §13.5–§13.7) y `01_contratos_compartidos.md §4` (`VerbalizationRow`).
 
-**Lo que el contrato dice:** El plan M1 declara la firma `core.parser.parse_tsv(path: Path) -> Iterator[VerbalizationRow]`, pero al mismo tiempo exige que el parser **reporte** filas inválidas (menos de 6 columnas, `nps_rate` fuera de rango, `nps_group` con typo, etc.) y que el loader las cuente en `LoadReport.rows_invalid`.
+**Lo que el contrato decía:** El plan M1 declaraba la firma `core.parser.parse_tsv(path: Path) -> Iterator[VerbalizationRow]`, pero al mismo tiempo exigía que el parser **reportara** filas inválidas (menos de 6 columnas, `nps_rate` fuera de rango, `nps_group` con typo, etc.) y que el loader las contara en `LoadReport.rows_invalid`.
 
 **Lo que la sesión hizo:** El parser yield-ea `ParsedRow` (dataclass interno con `is_valid`, `error`, `row: VerbalizationRow | None`, `response_date_iso`, `verbatim_clean`). Las filas válidas exponen su `VerbalizationRow` en `.row`; las inválidas llevan motivo. El loader consume `ParsedRow` directamente. El DTO público `VerbalizationRow` (frozen en `schemas.py`) no se tocó.
 
-**Razón:** Yield-ear sólo `VerbalizationRow` obligaría a perder información para los conteos del `LoadReport` o a usar un canal lateral (logging) para "reportar". `ParsedRow` mantiene el contrato del DTO público intacto y hace contables las inválidas. Es además lo que la propia spec sugiere implícitamente en su ejemplo `_normalize_row(row, row_num)`.
+**Razón:** Yield-ear sólo `VerbalizationRow` obligaría a perder información para los conteos del `LoadReport` o a usar un canal lateral (logging) para "reportar". `ParsedRow` mantiene el contrato del DTO público intacto y hace contables las inválidas.
 
-**Resolución del usuario:** _(pendiente)_
+**Resolución:** Aceptado `Iterator[ParsedRow]` como firma autoritativa. `02_M1_datos.md` actualizado para reflejar la firma real con descripción del dataclass interno. El DTO público `VerbalizationRow` permanece sin cambios — sigue siendo el tipo expuesto en `ParsedRow.row` cuando `is_valid=True`.
 
 ---
 
-## 2026-05-21 — M1: `LoadReport.already_processed` no existe en el DTO congelado
+## 2026-05-21 — M1: `LoadReport.already_processed` no existe en el DTO congelado (RESUELTO)
 
 **Decisión/contrato afectado:** `02_M1_datos.md` (sección "LoadReport") y `01_contratos_compartidos.md §4` (`LoadReport`).
 
-**Lo que el contrato dice:** El plan M1 dice "Adicionalmente expone una propiedad `already_processed: bool` (no en el schema persistido, sólo en el DTO) derivada de la existencia previa del `sha256`." Pero el DTO en `core/src/core/schemas.py` (stub congelado) **no** declara ese campo.
+**Lo que el contrato decía:** El plan M1 declaraba "Adicionalmente expone una propiedad `already_processed: bool` (no en el schema persistido, sólo en el DTO) derivada de la existencia previa del `sha256`." Pero el DTO en `core/src/core/schemas.py` (stub congelado de Etapa 0) **no** declaraba ese campo.
 
-**Lo que la sesión hizo:** No se modificó el DTO. El caso "archivo ya procesado" es detectable por el caller con `report.rows_inserted == 0 and report.rows_duplicated == report.rows_total`. Los tests de loader verifican esa condición en lugar de `already_processed=True`.
+**Lo que la sesión hizo originalmente:** No modificó el DTO. El caso "archivo ya procesado" era detectable por el caller con `report.rows_inserted == 0 and report.rows_duplicated == report.rows_total`. Los tests de loader verificaban esa condición en lugar de `already_processed=True`.
 
-**Razón:** El prompt de la sesión dijo "los stubs ya existen ... respétalos como contrato congelado". Modificar `schemas.py` para agregar el campo violaría esa instrucción. La invariante semántica se preserva por inferencia.
-
-**Resolución del usuario:** _(pendiente)_
+**Resolución:** Añadido `already_processed: bool = False` al DTO `LoadReport` en `core/src/core/schemas.py` y reflejado en `01_contratos_compartidos.md §4`. El loader lo pobla con `True` cuando el `sha256` ya existía y con `False` cuando es un archivo nuevo. Test de loader extendido para validar el campo.
 
 ---
