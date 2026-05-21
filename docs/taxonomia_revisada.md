@@ -26,7 +26,7 @@
 - 2.2.3 vs 10.3 (síntoma "muchas vueltas" vs causa "procesos burocráticos").
 - 8.3 vs 9.1 vs 9.2 (cargo no reconocido vs proceso de aclaración vs fraude). Este es el solapamiento más peligroso porque una misma queja puede legítimamente caer en los tres.
 
-**Resultado volumétrico**: 15 L1, 48 L2, ~90 L3 — dentro del rango defendible para arrancar, con regla automática de colapsar hojas que no acumulen >100 menciones/mes hacia su L2 padre.
+**Resultado volumétrico**: 15 L1, 45 L2, 82 L3 — dentro del rango defendible para arrancar, con regla automática de colapsar hojas que no acumulen >100 menciones/mes hacia su L2 padre.
 
 ---
 
@@ -218,8 +218,8 @@ No son categorías. Son atributos extraídos en paralelo a la clasificación, ap
 ## Resumen volumétrico estimado
 
 - **L1:** 15 categorías raíz (cumple el >8 del KPI con holgura).
-- **L2:** 48 subcategorías.
-- **L3:** ~90 aspectos neutrales (dentro del rango defendible de 80-100 al arrancar).
+- **L2:** 45 subcategorías.
+- **L3:** 82 aspectos neutrales (dentro del rango defendible de 80-100 al arrancar).
 - **Metadatos transversales:** 4 atributos extraídos en paralelo.
 
 Las hojas L3 con <100 menciones/mes en producción se colapsan a su L2 padre vía el active learning loop, y los clusters bottom-up que justifiquen apertura nueva se promueven a L3 con evidencia volumétrica.
