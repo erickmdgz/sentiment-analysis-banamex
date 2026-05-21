@@ -1,0 +1,9 @@
+# Formato: canal_canonico: keyword1, keyword2, ...
+# Las keywords se comparan en minúsculas y sin acentos.
+# Líneas que empiezan con # son comentarios.
+app: app, aplicación, aplicacion, móvil, movil, celular, banamex móvil, banamex movil, netkey
+atm: atm, cajero automático, cajero automatico, cajero
+telefonica: telefónica, telefonica, call center, llamada, centro de atención, centro de atencion, contact center
+web: web, portal, internet, página, pagina
+chat: whatsapp, chat, mensaje
+sucursal: sucursal, oficina, ventanilla

@@ -1,0 +1,204 @@
+record_id,response_date,response_year,response_month,nps_group,nps_rate,verbatim,verbatim_clean,branch_id,has_verbatim
+R00001,2025-01-13,2025,1,Detractor,3,"No me resolvieron el problema, llevo tres visitas.","No me resolvieron el problema, llevo tres visitas.",A-0068,1
+R00002,2025-01-16,2025,1,Detractor,4,"No respetaron mi turno, me adelantaron a tres personas.","No respetaron mi turno, me adelantaron a tres personas.",A-0066,1
+R00003,2025-01-07,2025,1,Detractor,3,"No me resolvieron el problema, llevo tres visitas.","No me resolvieron el problema, llevo tres visitas.",A-0033,1
+R00004,2025-01-20,2025,1,Detractor,0,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0094,1
+R00005,2025-01-13,2025,1,Detractor,5,"La app no me deja transferir, NetKey siempre falla.","La app no me deja transferir, NetKey siempre falla.",A-0005,1
+R00006,2025-02-01,2025,2,Detractor,3,"Pésimo trato en el call center, me cuelgan.","Pésimo trato en el call center, me cuelgan.",A-0078,1
+R00007,2025-02-17,2025,2,Detractor,5,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0083,1
+R00008,2025-02-04,2025,2,Detractor,2,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0092,1
+R00009,2025-02-15,2025,2,Detractor,6,El cajero retuvo mi tarjeta y nadie sabe nada.,El cajero retuvo mi tarjeta y nadie sabe nada.,A-0082,1
+R00010,2025-02-21,2025,2,Detractor,4,"No respetaron mi turno, me adelantaron a tres personas.","No respetaron mi turno, me adelantaron a tres personas.",A-0048,1
+R00011,2025-03-16,2025,3,Detractor,2,Los requisitos para el crédito son excesivos y burocráticos.,Los requisitos para el crédito son excesivos y burocráticos.,A-0046,1
+R00012,2025-03-10,2025,3,Detractor,6,"En México tardan mucho en atender, prefiero BBVA.","En México tardan mucho en atender, prefiero BBVA.",A-0059,1
+R00013,2025-03-21,2025,3,Detractor,6,"En México tardan mucho en atender, prefiero BBVA.","En México tardan mucho en atender, prefiero BBVA.",A-0019,1
+R00014,2025-03-14,2025,3,Detractor,4,Esperé más de dos horas para una aclaración de cargo.,Esperé más de dos horas para una aclaración de cargo.,A-0033,1
+R00015,2025-03-10,2025,3,Detractor,4,Los requisitos para el crédito son excesivos y burocráticos.,Los requisitos para el crédito son excesivos y burocráticos.,A-0031,1
+R00016,2025-04-19,2025,4,Detractor,2,Los requisitos para el crédito son excesivos y burocráticos.,Los requisitos para el crédito son excesivos y burocráticos.,A-0060,1
+R00017,2025-04-17,2025,4,Detractor,2,La página web siempre está caída cuando la necesito.,La página web siempre está caída cuando la necesito.,A-0083,1
+R00018,2025-04-26,2025,4,Detractor,3,La página web siempre está caída cuando la necesito.,La página web siempre está caída cuando la necesito.,A-0011,1
+R00019,2025-04-15,2025,4,Detractor,4,"Pésimo trato en el call center, me cuelgan.","Pésimo trato en el call center, me cuelgan.",A-0083,1
+R00020,2025-04-08,2025,4,Detractor,2,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0041,1
+R00021,2025-05-27,2025,5,Detractor,3,"En México tardan mucho en atender, prefiero BBVA.","En México tardan mucho en atender, prefiero BBVA.",A-0068,1
+R00022,2025-05-17,2025,5,Detractor,0,"El gerente fue grosero conmigo, no recomiendo esta sucursal.","El gerente fue grosero conmigo, no recomiendo esta sucursal.",A-0020,1
+R00023,2025-05-21,2025,5,Detractor,2,"No respetaron mi turno, me adelantaron a tres personas.","No respetaron mi turno, me adelantaron a tres personas.",A-0037,1
+R00024,2025-05-18,2025,5,Detractor,3,"La app no me deja transferir, NetKey siempre falla.","La app no me deja transferir, NetKey siempre falla.",A-0074,1
+R00025,2025-05-18,2025,5,Detractor,0,"Demasiados trámites para algo tan simple, vueltas innecesarias.","Demasiados trámites para algo tan simple, vueltas innecesarias.",A-0040,1
+R00026,2025-06-22,2025,6,Detractor,4,"No respetaron mi turno, me adelantaron a tres personas.","No respetaron mi turno, me adelantaron a tres personas.",A-0048,1
+R00027,2025-06-22,2025,6,Detractor,3,El servicio fue muy lento y la fila no avanzaba.,El servicio fue muy lento y la fila no avanzaba.,A-0089,1
+R00028,2025-06-28,2025,6,Detractor,4,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0047,1
+R00029,2025-06-13,2025,6,Detractor,3,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0097,1
+R00030,2025-06-23,2025,6,Detractor,0,"No me resolvieron el problema, llevo tres visitas.","No me resolvieron el problema, llevo tres visitas.",A-0021,1
+R00031,2025-07-21,2025,7,Detractor,3,"El gerente fue grosero conmigo, no recomiendo esta sucursal.","El gerente fue grosero conmigo, no recomiendo esta sucursal.",A-0083,1
+R00032,2025-07-19,2025,7,Detractor,1,"El gerente fue grosero conmigo, no recomiendo esta sucursal.","El gerente fue grosero conmigo, no recomiendo esta sucursal.",A-0048,1
+R00033,2025-07-04,2025,7,Detractor,4,"La sucursal está sucia y mal cuidada, da mala impresión.","La sucursal está sucia y mal cuidada, da mala impresión.",A-0086,1
+R00034,2025-07-14,2025,7,Detractor,3,Los requisitos para el crédito son excesivos y burocráticos.,Los requisitos para el crédito son excesivos y burocráticos.,A-0059,1
+R00035,2025-08-21,2025,8,Detractor,3,"La app no me deja transferir, NetKey siempre falla.","La app no me deja transferir, NetKey siempre falla.",A-0072,1
+R00036,2025-08-07,2025,8,Detractor,6,El servicio fue muy lento y la fila no avanzaba.,El servicio fue muy lento y la fila no avanzaba.,A-0013,1
+R00037,2025-08-26,2025,8,Detractor,1,El cajero retuvo mi tarjeta y nadie sabe nada.,El cajero retuvo mi tarjeta y nadie sabe nada.,A-0079,1
+R00038,2025-08-18,2025,8,Detractor,5,El asesor no sabía nada del producto que me ofrecía.,El asesor no sabía nada del producto que me ofrecía.,A-0068,1
+R00039,2025-09-04,2025,9,Detractor,5,El cajero automático no funciona desde la semana pasada.,El cajero automático no funciona desde la semana pasada.,A-0001,1
+R00040,2025-09-28,2025,9,Detractor,3,El asesor no sabía nada del producto que me ofrecía.,El asesor no sabía nada del producto que me ofrecía.,A-0075,1
+R00041,2025-09-24,2025,9,Detractor,1,El cajero automático no funciona desde la semana pasada.,El cajero automático no funciona desde la semana pasada.,A-0060,1
+R00042,2025-09-28,2025,9,Detractor,6,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0057,1
+R00043,2025-10-14,2025,10,Detractor,4,"Reporté un fraude y no me dieron seguimiento, terrible.","Reporté un fraude y no me dieron seguimiento, terrible.",A-0008,1
+R00044,2025-10-05,2025,10,Detractor,5,Esperé más de dos horas para una aclaración de cargo.,Esperé más de dos horas para una aclaración de cargo.,A-0082,1
+R00045,2025-10-16,2025,10,Detractor,2,"La sucursal está sucia y mal cuidada, da mala impresión.","La sucursal está sucia y mal cuidada, da mala impresión.",A-0097,1
+R00046,2025-10-21,2025,10,Detractor,4,Esperé más de dos horas para una aclaración de cargo.,Esperé más de dos horas para una aclaración de cargo.,A-0026,1
+R00047,2025-11-26,2025,11,Detractor,5,"Reporté un fraude y no me dieron seguimiento, terrible.","Reporté un fraude y no me dieron seguimiento, terrible.",A-0013,1
+R00048,2025-11-08,2025,11,Detractor,2,Las comisiones que me cobran son altísimas e injustas.,Las comisiones que me cobran son altísimas e injustas.,A-0087,1
+R00049,2025-11-13,2025,11,Detractor,0,"El gerente fue grosero conmigo, no recomiendo esta sucursal.","El gerente fue grosero conmigo, no recomiendo esta sucursal.",A-0094,1
+R00050,2025-11-23,2025,11,Detractor,6,"Pésimo trato en el call center, me cuelgan.","Pésimo trato en el call center, me cuelgan.",A-0051,1
+R00051,2025-12-17,2025,12,Detractor,5,"Reporté un fraude y no me dieron seguimiento, terrible.","Reporté un fraude y no me dieron seguimiento, terrible.",A-0079,1
+R00052,2025-12-01,2025,12,Detractor,0,"La app no me deja transferir, NetKey siempre falla.","La app no me deja transferir, NetKey siempre falla.",A-0034,1
+R00053,2025-12-16,2025,12,Detractor,2,"No me resolvieron el problema, llevo tres visitas.","No me resolvieron el problema, llevo tres visitas.",A-0009,1
+R00054,2025-12-03,2025,12,Detractor,1,Cobros no reconocidos en mi tarjeta y nadie me ayuda.,Cobros no reconocidos en mi tarjeta y nadie me ayuda.,A-0022,1
+R00055,2026-01-15,2026,1,Detractor,3,"El gerente fue grosero conmigo, no recomiendo esta sucursal.","El gerente fue grosero conmigo, no recomiendo esta sucursal.",A-0011,1
+R00056,2026-01-08,2026,1,Detractor,3,"La app no me deja transferir, NetKey siempre falla.","La app no me deja transferir, NetKey siempre falla.",A-0054,1
+R00057,2026-01-14,2026,1,Detractor,5,El servicio fue muy lento y la fila no avanzaba.,El servicio fue muy lento y la fila no avanzaba.,A-0092,1
+R00058,2026-01-19,2026,1,Detractor,4,"La app no me deja transferir, NetKey siempre falla.","La app no me deja transferir, NetKey siempre falla.",A-0029,1
+R00059,2026-02-20,2026,2,Detractor,2,Esperé más de dos horas para una aclaración de cargo.,Esperé más de dos horas para una aclaración de cargo.,A-0066,1
+R00060,2026-02-25,2026,2,Detractor,1,El cajero retuvo mi tarjeta y nadie sabe nada.,El cajero retuvo mi tarjeta y nadie sabe nada.,A-0025,1
+R00061,2026-02-18,2026,2,Detractor,3,"Mala actitud del personal de ventanilla, no lo recomiendo.","Mala actitud del personal de ventanilla, no lo recomiendo.",A-0005,1
+R00062,2026-02-23,2026,2,Detractor,5,"Reporté un fraude y no me dieron seguimiento, terrible.","Reporté un fraude y no me dieron seguimiento, terrible.",A-0099,1
+R00063,2026-03-13,2026,3,Detractor,3,"Promoción engañosa, terminé pagando más comisiones.","Promoción engañosa, terminé pagando más comisiones.",A-0092,1
+R00064,2026-03-15,2026,3,Detractor,2,El cajero retuvo mi tarjeta y nadie sabe nada.,El cajero retuvo mi tarjeta y nadie sabe nada.,A-0025,1
+R00065,2026-03-01,2026,3,Detractor,2,"Pésimo trato en el call center, me cuelgan.","Pésimo trato en el call center, me cuelgan.",A-0021,1
+R00066,2026-03-05,2026,3,Detractor,5,"No respetaron mi turno, me adelantaron a tres personas.","No respetaron mi turno, me adelantaron a tres personas.",A-0042,1
+R00067,2026-04-16,2026,4,Detractor,4,"Demasiados trámites para algo tan simple, vueltas innecesarias.","Demasiados trámites para algo tan simple, vueltas innecesarias.",A-0013,1
+R00068,2026-04-07,2026,4,Detractor,4,El servicio fue muy lento y la fila no avanzaba.,El servicio fue muy lento y la fila no avanzaba.,A-0099,1
+R00069,2026-04-07,2026,4,Detractor,1,Las comisiones que me cobran son altísimas e injustas.,Las comisiones que me cobran son altísimas e injustas.,A-0097,1
+R00070,2026-04-01,2026,4,Detractor,0,Cobros no reconocidos en mi tarjeta y nadie me ayuda.,Cobros no reconocidos en mi tarjeta y nadie me ayuda.,A-0020,1
+R00071,2025-01-03,2025,1,Pasivo,7,Encontré estacionamiento aunque la sucursal estaba llena.,Encontré estacionamiento aunque la sucursal estaba llena.,A-0033,1
+R00072,2025-01-01,2025,1,Pasivo,7,Encontré estacionamiento aunque la sucursal estaba llena.,Encontré estacionamiento aunque la sucursal estaba llena.,A-0051,1
+R00073,2025-01-06,2025,1,Pasivo,8,"La atención fue normal, esperé un poco.","La atención fue normal, esperé un poco.",A-0006,1
+R00074,2025-01-22,2025,1,Pasivo,7,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0093,1
+R00075,2025-02-08,2025,2,Pasivo,8,"Hice mi transferencia sin problemas, esperando que mejore la app.","Hice mi transferencia sin problemas, esperando que mejore la app.",A-0077,1
+R00076,2025-02-26,2025,2,Pasivo,7,"La app funcionó esta vez, antes había tenido problemas.","La app funcionó esta vez, antes había tenido problemas.",A-0032,1
+R00077,2025-02-27,2025,2,Pasivo,7,"El personal me atendió, pero sin mucho entusiasmo.","El personal me atendió, pero sin mucho entusiasmo.",A-0053,1
+R00078,2025-02-04,2025,2,Pasivo,7,"Pude hacer mi operación, aunque tomó tiempo.","Pude hacer mi operación, aunque tomó tiempo.",A-0071,1
+R00079,2025-03-17,2025,3,Pasivo,8,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0019,1
+R00080,2025-03-04,2025,3,Pasivo,7,"La app funcionó esta vez, antes había tenido problemas.","La app funcionó esta vez, antes había tenido problemas.",A-0081,1
+R00081,2025-03-15,2025,3,Pasivo,7,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0081,1
+R00082,2025-04-26,2025,4,Pasivo,7,"Hice mi transferencia sin problemas, esperando que mejore la app.","Hice mi transferencia sin problemas, esperando que mejore la app.",A-0046,1
+R00083,2025-04-09,2025,4,Pasivo,7,"La atención fue normal, esperé un poco.","La atención fue normal, esperé un poco.",A-0017,1
+R00084,2025-04-14,2025,4,Pasivo,8,"El personal me atendió, pero sin mucho entusiasmo.","El personal me atendió, pero sin mucho entusiasmo.",A-0010,1
+R00085,2025-05-10,2025,5,Pasivo,8,"La app funcionó esta vez, antes había tenido problemas.","La app funcionó esta vez, antes había tenido problemas.",A-0042,1
+R00086,2025-05-10,2025,5,Pasivo,7,El cajero funcionó pero solo dispensaba billetes de mayor denominación.,El cajero funcionó pero solo dispensaba billetes de mayor denominación.,A-0072,1
+R00087,2025-05-25,2025,5,Pasivo,7,"Hice mi transferencia sin problemas, esperando que mejore la app.","Hice mi transferencia sin problemas, esperando que mejore la app.",A-0075,1
+R00088,2025-06-12,2025,6,Pasivo,8,"El personal me atendió, pero sin mucho entusiasmo.","El personal me atendió, pero sin mucho entusiasmo.",A-0003,1
+R00089,2025-06-18,2025,6,Pasivo,8,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0091,1
+R00090,2025-06-03,2025,6,Pasivo,8,"La app funcionó esta vez, antes había tenido problemas.","La app funcionó esta vez, antes había tenido problemas.",A-0008,1
+R00091,2025-07-03,2025,7,Pasivo,7,El cajero funcionó pero solo dispensaba billetes de mayor denominación.,El cajero funcionó pero solo dispensaba billetes de mayor denominación.,A-0013,1
+R00092,2025-07-22,2025,7,Pasivo,8,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0036,1
+R00093,2025-07-04,2025,7,Pasivo,8,"Hice mi transferencia sin problemas, esperando que mejore la app.","Hice mi transferencia sin problemas, esperando que mejore la app.",A-0069,1
+R00094,2025-08-06,2025,8,Pasivo,7,"La atención fue normal, esperé un poco.","La atención fue normal, esperé un poco.",A-0028,1
+R00095,2025-08-27,2025,8,Pasivo,7,"Pude hacer mi operación, aunque tomó tiempo.","Pude hacer mi operación, aunque tomó tiempo.",A-0022,1
+R00096,2025-08-15,2025,8,Pasivo,8,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0025,1
+R00097,2025-09-28,2025,9,Pasivo,8,El cajero funcionó pero solo dispensaba billetes de mayor denominación.,El cajero funcionó pero solo dispensaba billetes de mayor denominación.,A-0082,1
+R00098,2025-09-01,2025,9,Pasivo,8,"La app funcionó esta vez, antes había tenido problemas.","La app funcionó esta vez, antes había tenido problemas.",A-0001,1
+R00099,2025-09-08,2025,9,Pasivo,8,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0097,1
+R00100,2025-10-04,2025,10,Pasivo,8,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0088,1
+R00101,2025-10-09,2025,10,Pasivo,8,"Hice mi transferencia sin problemas, esperando que mejore la app.","Hice mi transferencia sin problemas, esperando que mejore la app.",A-0092,1
+R00102,2025-10-22,2025,10,Pasivo,8,"El personal me atendió, pero sin mucho entusiasmo.","El personal me atendió, pero sin mucho entusiasmo.",A-0064,1
+R00103,2025-11-16,2025,11,Pasivo,8,"El personal me atendió, pero sin mucho entusiasmo.","El personal me atendió, pero sin mucho entusiasmo.",A-0033,1
+R00104,2025-11-05,2025,11,Pasivo,7,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0075,1
+R00105,2025-11-28,2025,11,Pasivo,7,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0095,1
+R00106,2025-12-23,2025,12,Pasivo,7,"Cumplió con lo necesario, sin sobresalir.","Cumplió con lo necesario, sin sobresalir.",A-0053,1
+R00107,2025-12-12,2025,12,Pasivo,8,"El personal me atendió, pero sin mucho entusiasmo.","El personal me atendió, pero sin mucho entusiasmo.",A-0073,1
+R00108,2025-12-19,2025,12,Pasivo,7,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0050,1
+R00109,2026-01-02,2026,1,Pasivo,8,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0003,1
+R00110,2026-01-23,2026,1,Pasivo,7,"El servicio fue regular, nada especial.","El servicio fue regular, nada especial.",A-0021,1
+R00111,2026-01-19,2026,1,Pasivo,8,"La atención fue normal, esperé un poco.","La atención fue normal, esperé un poco.",A-0035,1
+R00112,2026-02-17,2026,2,Pasivo,7,"Hice mi transferencia sin problemas, esperando que mejore la app.","Hice mi transferencia sin problemas, esperando que mejore la app.",A-0097,1
+R00113,2026-02-17,2026,2,Pasivo,7,"La atención fue normal, esperé un poco.","La atención fue normal, esperé un poco.",A-0058,1
+R00114,2026-02-02,2026,2,Pasivo,8,"Me dieron información, podría haber sido más clara.","Me dieron información, podría haber sido más clara.",A-0099,1
+R00115,2026-03-11,2026,3,Pasivo,8,"Pude hacer mi operación, aunque tomó tiempo.","Pude hacer mi operación, aunque tomó tiempo.",A-0097,1
+R00116,2026-03-27,2026,3,Pasivo,8,Encontré estacionamiento aunque la sucursal estaba llena.,Encontré estacionamiento aunque la sucursal estaba llena.,A-0015,1
+R00117,2026-03-24,2026,3,Pasivo,7,Encontré estacionamiento aunque la sucursal estaba llena.,Encontré estacionamiento aunque la sucursal estaba llena.,A-0096,1
+R00118,2026-04-26,2026,4,Pasivo,8,Encontré estacionamiento aunque la sucursal estaba llena.,Encontré estacionamiento aunque la sucursal estaba llena.,A-0015,1
+R00119,2026-04-15,2026,4,Pasivo,7,"Pude hacer mi operación, aunque tomó tiempo.","Pude hacer mi operación, aunque tomó tiempo.",A-0043,1
+R00120,2026-04-06,2026,4,Pasivo,8,"El servicio fue regular, nada especial.","El servicio fue regular, nada especial.",A-0081,1
+R00121,2025-01-20,2025,1,Promotor,10,"Sucursal limpia, ordenada y con personal amable.","Sucursal limpia, ordenada y con personal amable.",A-0002,1
+R00122,2025-01-18,2025,1,Promotor,9,"Atención rápida y eficiente, sin filas.","Atención rápida y eficiente, sin filas.",A-0064,1
+R00123,2025-01-25,2025,1,Promotor,10,"Personal capacitado, me asesoró bien sobre mi crédito.","Personal capacitado, me asesoró bien sobre mi crédito.",A-0045,1
+R00124,2025-01-22,2025,1,Promotor,10,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0069,1
+R00125,2025-01-09,2025,1,Promotor,9,"Los puntos los pude canjear sin problema, todo claro.","Los puntos los pude canjear sin problema, todo claro.",A-0029,1
+R00126,2025-02-05,2025,2,Promotor,10,El ejecutivo Mateo me explicó claramente todas las opciones.,El ejecutivo Mateo me explicó claramente todas las opciones.,A-0057,1
+R00127,2025-02-20,2025,2,Promotor,10,"El portal web responde rápido, hago mis transferencias en segundos.","El portal web responde rápido, hago mis transferencias en segundos.",A-0025,1
+R00128,2025-02-17,2025,2,Promotor,10,El ejecutivo Mateo me explicó claramente todas las opciones.,El ejecutivo Mateo me explicó claramente todas las opciones.,A-0094,1
+R00129,2025-02-06,2025,2,Promotor,10,"Recomiendo ampliamente esta sucursal, atención de primera.","Recomiendo ampliamente esta sucursal, atención de primera.",A-0093,1
+R00130,2025-02-22,2025,2,Promotor,10,"Trámite ágil para abrir mi cuenta, salí en 15 minutos.","Trámite ágil para abrir mi cuenta, salí en 15 minutos.",A-0038,1
+R00131,2025-03-22,2025,3,Promotor,9,"Buena atención telefónica, la asesora Carmen muy paciente.","Buena atención telefónica, la asesora Carmen muy paciente.",A-0025,1
+R00132,2025-03-22,2025,3,Promotor,10,"Buena atención telefónica, la asesora Carmen muy paciente.","Buena atención telefónica, la asesora Carmen muy paciente.",A-0018,1
+R00133,2025-03-21,2025,3,Promotor,10,"Personal capacitado, me asesoró bien sobre mi crédito.","Personal capacitado, me asesoró bien sobre mi crédito.",A-0039,1
+R00134,2025-03-09,2025,3,Promotor,10,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0097,1
+R00135,2025-03-12,2025,3,Promotor,9,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0049,1
+R00136,2025-04-16,2025,4,Promotor,9,"Sucursal limpia, ordenada y con personal amable.","Sucursal limpia, ordenada y con personal amable.",A-0060,1
+R00137,2025-04-10,2025,4,Promotor,9,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0025,1
+R00138,2025-04-09,2025,4,Promotor,9,"Recomiendo ampliamente esta sucursal, atención de primera.","Recomiendo ampliamente esta sucursal, atención de primera.",A-0020,1
+R00139,2025-04-21,2025,4,Promotor,9,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0094,1
+R00140,2025-04-02,2025,4,Promotor,9,"Buena atención telefónica, la asesora Carmen muy paciente.","Buena atención telefónica, la asesora Carmen muy paciente.",A-0077,1
+R00141,2025-05-02,2025,5,Promotor,10,"Sucursal limpia, ordenada y con personal amable.","Sucursal limpia, ordenada y con personal amable.",A-0084,1
+R00142,2025-05-24,2025,5,Promotor,9,"El portal web responde rápido, hago mis transferencias en segundos.","El portal web responde rápido, hago mis transferencias en segundos.",A-0052,1
+R00143,2025-05-06,2025,5,Promotor,9,"Lo recomiendo, la atención es mejor que en BBVA o Santander.","Lo recomiendo, la atención es mejor que en BBVA o Santander.",A-0037,1
+R00144,2025-05-22,2025,5,Promotor,10,"Recomiendo ampliamente esta sucursal, atención de primera.","Recomiendo ampliamente esta sucursal, atención de primera.",A-0061,1
+R00145,2025-05-02,2025,5,Promotor,10,"Atención rápida y eficiente, sin filas.","Atención rápida y eficiente, sin filas.",A-0056,1
+R00146,2025-06-27,2025,6,Promotor,10,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0081,1
+R00147,2025-06-17,2025,6,Promotor,9,"El portal web responde rápido, hago mis transferencias en segundos.","El portal web responde rápido, hago mis transferencias en segundos.",A-0002,1
+R00148,2025-06-07,2025,6,Promotor,10,"La cajera Ana fue muy cordial y paciente, gracias.","La cajera Ana fue muy cordial y paciente, gracias.",A-0071,1
+R00149,2025-06-25,2025,6,Promotor,10,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0080,1
+R00150,2025-06-17,2025,6,Promotor,10,"Buena atención telefónica, la asesora Carmen muy paciente.","Buena atención telefónica, la asesora Carmen muy paciente.",A-0033,1
+R00151,2025-07-28,2025,7,Promotor,9,"Recomiendo ampliamente esta sucursal, atención de primera.","Recomiendo ampliamente esta sucursal, atención de primera.",A-0066,1
+R00152,2025-07-25,2025,7,Promotor,10,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0091,1
+R00153,2025-07-24,2025,7,Promotor,10,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0050,1
+R00154,2025-07-12,2025,7,Promotor,10,"Recomiendo ampliamente esta sucursal, atención de primera.","Recomiendo ampliamente esta sucursal, atención de primera.",A-0094,1
+R00155,2025-07-18,2025,7,Promotor,9,"Los puntos los pude canjear sin problema, todo claro.","Los puntos los pude canjear sin problema, todo claro.",A-0005,1
+R00156,2025-08-22,2025,8,Promotor,10,"Resolvieron mi aclaración en menos de una hora, excelente.","Resolvieron mi aclaración en menos de una hora, excelente.",A-0043,1
+R00157,2025-08-04,2025,8,Promotor,9,"Resolvieron mi aclaración en menos de una hora, excelente.","Resolvieron mi aclaración en menos de una hora, excelente.",A-0078,1
+R00158,2025-08-05,2025,8,Promotor,10,"Trámite ágil para abrir mi cuenta, salí en 15 minutos.","Trámite ágil para abrir mi cuenta, salí en 15 minutos.",A-0078,1
+R00159,2025-08-07,2025,8,Promotor,9,"Sucursal limpia, ordenada y con personal amable.","Sucursal limpia, ordenada y con personal amable.",A-0016,1
+R00160,2025-08-15,2025,8,Promotor,9,"Resolvieron mi aclaración en menos de una hora, excelente.","Resolvieron mi aclaración en menos de una hora, excelente.",A-0050,1
+R00161,2025-09-16,2025,9,Promotor,9,"Los puntos los pude canjear sin problema, todo claro.","Los puntos los pude canjear sin problema, todo claro.",A-0099,1
+R00162,2025-09-11,2025,9,Promotor,10,"Atención rápida y eficiente, sin filas.","Atención rápida y eficiente, sin filas.",A-0045,1
+R00163,2025-09-05,2025,9,Promotor,9,"Personal capacitado, me asesoró bien sobre mi crédito.","Personal capacitado, me asesoró bien sobre mi crédito.",A-0010,1
+R00164,2025-09-08,2025,9,Promotor,9,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0099,1
+R00165,2025-09-08,2025,9,Promotor,10,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0023,1
+R00166,2025-10-03,2025,10,Promotor,9,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0025,1
+R00167,2025-10-20,2025,10,Promotor,9,"Buena atención telefónica, la asesora Carmen muy paciente.","Buena atención telefónica, la asesora Carmen muy paciente.",A-0011,1
+R00168,2025-10-24,2025,10,Promotor,10,"Personal capacitado, me asesoró bien sobre mi crédito.","Personal capacitado, me asesoró bien sobre mi crédito.",A-0089,1
+R00169,2025-10-11,2025,10,Promotor,9,"El gerente Roberto me atendió excelente, muy profesional.","El gerente Roberto me atendió excelente, muy profesional.",A-0084,1
+R00170,2025-10-19,2025,10,Promotor,10,"La cajera Ana fue muy cordial y paciente, gracias.","La cajera Ana fue muy cordial y paciente, gracias.",A-0063,1
+R00171,2025-11-21,2025,11,Promotor,9,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0092,1
+R00172,2025-11-25,2025,11,Promotor,10,"Atención rápida y eficiente, sin filas.","Atención rápida y eficiente, sin filas.",A-0094,1
+R00173,2025-11-19,2025,11,Promotor,9,"Resolvieron mi aclaración en menos de una hora, excelente.","Resolvieron mi aclaración en menos de una hora, excelente.",A-0012,1
+R00174,2025-11-17,2025,11,Promotor,9,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0061,1
+R00175,2025-11-07,2025,11,Promotor,10,"La cajera Ana fue muy cordial y paciente, gracias.","La cajera Ana fue muy cordial y paciente, gracias.",A-0082,1
+R00176,2025-12-11,2025,12,Promotor,9,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0024,1
+R00177,2025-12-14,2025,12,Promotor,10,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0008,1
+R00178,2025-12-15,2025,12,Promotor,10,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0022,1
+R00179,2025-12-26,2025,12,Promotor,10,"La cajera Ana fue muy cordial y paciente, gracias.","La cajera Ana fue muy cordial y paciente, gracias.",A-0054,1
+R00180,2025-12-17,2025,12,Promotor,9,"Trámite ágil para abrir mi cuenta, salí en 15 minutos.","Trámite ágil para abrir mi cuenta, salí en 15 minutos.",A-0085,1
+R00181,2026-01-04,2026,1,Promotor,10,"Trámite ágil para abrir mi cuenta, salí en 15 minutos.","Trámite ágil para abrir mi cuenta, salí en 15 minutos.",A-0019,1
+R00182,2026-01-26,2026,1,Promotor,9,"Lo recomiendo, la atención es mejor que en BBVA o Santander.","Lo recomiendo, la atención es mejor que en BBVA o Santander.",A-0015,1
+R00183,2026-01-11,2026,1,Promotor,10,"La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.","La srita Diana fue muy amable y resolvió mis dudas, lo recomiendo.",A-0056,1
+R00184,2026-01-24,2026,1,Promotor,9,"Los puntos los pude canjear sin problema, todo claro.","Los puntos los pude canjear sin problema, todo claro.",A-0043,1
+R00185,2026-01-02,2026,1,Promotor,10,"El portal web responde rápido, hago mis transferencias en segundos.","El portal web responde rápido, hago mis transferencias en segundos.",A-0096,1
+R00186,2026-02-18,2026,2,Promotor,9,"Resolvieron mi aclaración en menos de una hora, excelente.","Resolvieron mi aclaración en menos de una hora, excelente.",A-0075,1
+R00187,2026-02-22,2026,2,Promotor,10,"La cajera Ana fue muy cordial y paciente, gracias.","La cajera Ana fue muy cordial y paciente, gracias.",A-0057,1
+R00188,2026-02-10,2026,2,Promotor,10,"El portal web responde rápido, hago mis transferencias en segundos.","El portal web responde rápido, hago mis transferencias en segundos.",A-0081,1
+R00189,2026-02-05,2026,2,Promotor,9,"Recomiendo ampliamente esta sucursal, atención de primera.","Recomiendo ampliamente esta sucursal, atención de primera.",A-0063,1
+R00190,2026-02-09,2026,2,Promotor,10,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0070,1
+R00191,2026-03-27,2026,3,Promotor,10,"Sucursal limpia, ordenada y con personal amable.","Sucursal limpia, ordenada y con personal amable.",A-0095,1
+R00192,2026-03-21,2026,3,Promotor,10,"Atención rápida y eficiente, sin filas.","Atención rápida y eficiente, sin filas.",A-0001,1
+R00193,2026-03-22,2026,3,Promotor,10,"La cajera Ana fue muy cordial y paciente, gracias.","La cajera Ana fue muy cordial y paciente, gracias.",A-0027,1
+R00194,2026-03-02,2026,3,Promotor,10,"Atención rápida y eficiente, sin filas.","Atención rápida y eficiente, sin filas.",A-0070,1
+R00195,2026-03-19,2026,3,Promotor,9,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0026,1
+R00196,2026-04-22,2026,4,Promotor,9,"Personal capacitado, me asesoró bien sobre mi crédito.","Personal capacitado, me asesoró bien sobre mi crédito.",A-0063,1
+R00197,2026-04-22,2026,4,Promotor,9,"Buena atención telefónica, la asesora Carmen muy paciente.","Buena atención telefónica, la asesora Carmen muy paciente.",A-0032,1
+R00198,2026-04-02,2026,4,Promotor,9,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0082,1
+R00199,2026-04-26,2026,4,Promotor,10,"Excelente servicio en la app, todo funciona bien.","Excelente servicio en la app, todo funciona bien.",A-0082,1
+R00200,2026-04-07,2026,4,Promotor,10,El cajero automático funciona perfecto y siempre tiene billetes.,El cajero automático funciona perfecto y siempre tiene billetes.,A-0077,1
+R00201,2025-11-20,2025,11,Detractor,8,,,A-0030,0
+R00202,2025-10-07,2025,10,Detractor,0,,,A-0050,0
+R00203,2025-10-17,2025,10,Promotor,7,,,A-0092,0
