@@ -34,3 +34,17 @@ pythonpath = ["src"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
+
+# Paquetes hermanos (core, engine) no exportan marker py.typed: mypy strict
+# se queja de [import-untyped]. Los toleramos vía override; el DoD del módulo
+# garantiza que la API consumida es la declarada en 01_contratos_compartidos.md.
+[[tool.mypy.overrides]]
+module = ["core.*", "engine.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+# schemas.py es un stub congelado por contrato (01 §4). list[dict] aparece
+# sin parámetros en el DTO Ranking; lo dejamos pasar en ese archivo.
+[[tool.mypy.overrides]]
+module = "analytics.schemas"
+disallow_any_generics = false
