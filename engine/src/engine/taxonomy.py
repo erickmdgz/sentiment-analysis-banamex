@@ -31,7 +31,9 @@ TaxonomyDict = dict[str, L1Node]
 
 
 _L1_RE = re.compile(r"^####\s+(\d+)\.\s+\*\*(.+?)\*\*\s*$")
-_L2_RE = re.compile(r"^-\s+\*\*(\d+\.\d+)\s+(.+?)\*\*\s*$")
+# L2 acepta texto trailing tras `**` (la taxonomía real usa parentéticos:
+# `- **14.1 Elogio genérico** ("excelente", "todo bien")`).
+_L2_RE = re.compile(r"^-\s+\*\*(\d+\.\d+)\s+(.+?)\*\*")
 _L3_RE = re.compile(r"^\s+-\s+(\d+\.\d+\.\d+)\s+(.+?)\s*$")
 
 

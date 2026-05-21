@@ -40,16 +40,42 @@ Formato sugerido por entrada:
 
 ---
 
-## 2026-05-21 — M2a: anexo L1/L2/L3 a `docs/taxonomia_revisada.md`
+## 2026-05-21 — M2a: anexo L1/L2/L3 a `docs/taxonomia_revisada.md` (RESUELTO)
 
-**Decisión/contrato afectado:** `03_M2a_anotador.md` (Detalles de implementación → Parseo de taxonomía) y `00_decisiones_tecnicas.md` Anexo C (define L1/L2/L3 como vivientes en `taxonomia_revisada.md`).
+**Decisión/contrato afectado:** `03_M2a_anotador.md` (Detalles de implementación → Parseo de taxonomía) y `00_decisiones_tecnicas.md` Anexo C.
 
-**Lo que el contrato dice:** `engine.taxonomy.load_taxonomy()` parsea `docs/taxonomia_revisada.md` y debe encontrar 15 L1, 48 L2, ~90 L3 con regex específicas (`#### N. **Nombre**`, `- **N.M Nombre**`, `    - N.M.K Nombre`).
+**Lo que la sesión propuso originalmente:** Cuando arrancó M2a, el archivo `docs/taxonomia_revisada.md` heredado en la rama contenía sólo la propuesta inicial del MVP (texto narrativo, sin L1/L2/L3 parseable). Se añadió un Anexo con un árbol deducido (15/48/90) para destrabar el anotador.
 
-**Lo que la sesión propuso/hizo:** El archivo `docs/taxonomia_revisada.md` heredado en la rama contiene la propuesta inicial del MVP (texto narrativo) y sólo lista las 15 L1 a nivel conceptual en §14, sin L2/L3 ni formato parseable. M2a no puede arrancar sin esa jerarquía. Se **añadió un Anexo al final del archivo** con el árbol completo L1/L2/L3 en el formato exigido (15 L1, 48 L2, 90 L3) sin tocar el contenido existente. Los L2 críticos para reglas de desambiguación citadas en `03_M2a §Detalles → Reglas de desambiguación` (1.1, 1.2 con 1.2.2, 2.2 con 2.2.3, 6.5 con 6.5.1, 8.3, 9.1, 9.2, 10.3, 14.1, 14.2) están presentes y con esos códigos.
+**Resolución:** El usuario sustituyó el archivo por la **versión autoritativa del cliente** (commit posterior al primer push de M2a), que ya incluye la jerarquía completa con notas de desambiguación inline. El Anexo deducido quedó descartado (sobrescrito por completo, ningún diff a revertir). La nueva fuente vigente es la taxonomía del cliente — todo lo demás se ajustó a ella.
 
-**Razón:** No inventar códigos fuera del Anexo (regla del propio plan), pero sin la jerarquía no hay anotador. El Anexo es una materialización de lo que el plan ya asume que existe, no una reinterpretación del contrato.
+**Estado:** Resuelto. No bloquea ninguna sesión.
 
-**Resolución del usuario:** _(pendiente — validar que la nomenclatura concreta de L2/L3 elegida sea aceptable; si el usuario quisiera reemplazarla por una autoritativa de Banamex, basta con sobreescribir el anexo y re-correr `annotate-sample`)._
+---
+
+## 2026-05-21 — M2a: discrepancia entre el summary del doc y el contenido real
+
+**Decisión/contrato afectado:** `docs/taxonomia_revisada.md` (versión autoritativa del cliente, líneas 218-223 — sección "Resumen volumétrico estimado").
+
+**Lo que el contrato dice (resumen del doc):**
+
+> L1: 15 categorías raíz. L2: 48 subcategorías. L3: ~90 aspectos neutrales (dentro del rango 80-100).
+
+**Lo que el contenido real enumera al parsear:** **15 L1, 45 L2, 82 L3**. El parser determinístico (`engine.taxonomy.load_taxonomy`) cuenta ese desfase; los tests reflejan los conteos reales (`test_l2_count_matches_taxonomy_content`, `test_l3_count_matches_taxonomy_content`).
+
+**Razón del desfase:** el resumen del doc parece haberse escrito antes de cerrar la jerarquía, o algunas hojas se colapsaron sin actualizar el conteo. No afecta funcionalidad de M2a — la prompt de Ollama se construye a partir del contenido parseado, no del summary.
+
+**Resolución del usuario:** _(pendiente — decidir si actualizar el summary del doc a 45/82, o si faltan L2/L3 por agregar para llegar a 48/~90)._ No bloquea M2a.
+
+---
+
+## 2026-05-21 — M2a: verificación L1 codes vs ui_buckets/schemas (sin discrepancia)
+
+**Decisión/contrato afectado:** `engine/src/engine/ui_buckets.py` y `core/src/core/schemas.py` (stubs congelados).
+
+**Verificación realizada:** Los 15 L1 de la taxonomía vigente (códigos `"1"` a `"15"`) coinciden uno-a-uno con las claves de `UI_BUCKETS_BY_L1`. Los nombres canónicos de L1 (`"Atención al cliente"`, `"Tiempos y operación"`, `"Cajeros automáticos (ATM)"`, etc.) son distintos a los display-names de bucket (`"Atención del personal"`, `"Tiempos y espera"`, `"Cajeros (ATM)"`) **por diseño de `01 §6`** — el bucket es una etiqueta de UI, no el nombre del L1. No requiere acción.
+
+`core/src/core/schemas.py` no referencia códigos L1 directamente (sólo DTOs de NPSGroup, Polarity, ClassificationSource), por lo que no hay conflicto.
+
+**Estado:** Sin discrepancia. Anotado para trazabilidad.
 
 ---
