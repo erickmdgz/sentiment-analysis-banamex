@@ -2,15 +2,15 @@
 
 > **Lee este archivo primero cuando arranques una sesión nueva.** Es la fuente de verdad viva del proyecto entre sesiones. CLAUDE.md describe **qué es** el proyecto (estable); este archivo describe **dónde va** (volátil, se actualiza después de cada milestone).
 
-**Última actualización:** 2026-05-21 (cierre de Etapa 1)
-**Main HEAD:** `d059973` (Merge PR #2)
+**Última actualización:** 2026-05-21 (cierre de pendientes M1 + dep jsonschema, antes de lanzar Etapa 2)
+**Main HEAD:** `da5958c` (docs(plan): actualizar firma parse_tsv y cerrar entradas M1 resueltas)
 **Convención de actualización:** Claude actualiza este archivo después de cada milestone (cerrar PR, cerrar etapa, tomar decisión de contrato, descubrir convención operacional). Commit `docs(estado): ...`.
 
 ---
 
 ## Etapa actual
 
-**Etapa 2 — Lista pero no lanzada.** Se esperan 2 sesiones paralelas: M2b (clasificador supervisado) y M4 (API FastAPI). Los worktrees están listos en `feat/m2b-classifier` y `feat/m4-api` desde main `d059973`.
+**Etapa 2 — Lista pero no lanzada.** Se esperan 2 sesiones paralelas: M2b (clasificador supervisado) y M4 (API FastAPI). Los worktrees deben recrearse desde main `da5958c` (los anteriores estaban en `d059973`, antes de los fixes de contrato M1 y la dep `jsonschema`).
 
 Plan de orquestación completo: `~/.claude/plans/nuestro-plan-de-implementaci-n-misty-walrus.md` (no se versiona — vive en config local de Claude).
 
@@ -61,12 +61,7 @@ Convención: los worktrees viven **fuera** del repo principal (no pueden vivir a
    - M2b necesita correr `engine.cli annotate-sample` con golden set pequeño (size 500) antes de entrenar.
    - M4 puede usar `engine.mocks.classify_mock()` hasta que M2b se mergee; luego ajustar a `engine.pipeline.classify_batch()`.
 
-2. **Decidir sobre 2 entradas pendientes en `contracts_issues.md`** (M1):
-   - Firma de `parse_tsv` (yield `ParsedRow` vs `VerbalizationRow`).
-   - `LoadReport.already_processed` (añadir al DTO vs inferir con `rows_inserted==0 and rows_duplicated==rows_total`).
-   - Detalles completos en `docs/plan_implementacion/contracts_issues.md`. No bloquean Etapa 2.
-
-3. **Después de mergear M2b y M4** → lanzar Etapa 3 (M6 integración Docker + scripts + demo, sesión única).
+2. **Después de mergear M2b y M4** → lanzar Etapa 3 (M6 integración Docker + scripts + demo, sesión única).
 
 ---
 
@@ -74,6 +69,9 @@ Convención: los worktrees viven **fuera** del repo principal (no pueden vivir a
 
 | Fecha | Decisión | Origen |
 |---|---|---|
+| 2026-05-21 | DTO `LoadReport` ampliado con `already_processed: bool = False`. Cierra pendiente M1. | Commit `da5958c` (commit 2 del bundle: `feat(core): ...`) |
+| 2026-05-21 | Firma autoritativa de `parse_tsv` actualizada a `Iterator[ParsedRow]` (dataclass interno con `is_valid`/`error`/`row`). Cierra pendiente M1. | Commit `da5958c` (commit 3 del bundle: `docs(plan): ...`) |
+| 2026-05-21 | `jsonschema>=4.0` añadido como dependencia de `engine/pyproject.toml` (lo importa `engine.annotator`). | Commit `da5958c` (commit 1 del bundle: `chore(engine): ...`) |
 | 2026-05-21 | `docs/taxonomia_revisada.md` reemplazado por la versión autoritativa del cliente. El archivo de propuesta MVP previa se preserva como `docs/MVP Hackathon.md`. | Commit `ae3b19b` |
 | 2026-05-21 | Resumen volumétrico interno de la taxonomía corregido a 15 L1 / 45 L2 / 82 L3 (no 48 / ~90 como decía la propuesta). | Commit `ae3b19b` |
 | 2026-05-19 | Git se inicializó como Etapa -1 aunque `00_decisiones_tecnicas.md §26` decía "no reiniciar git". Decisión del usuario al aprobar el plan de orquestación. | `contracts_issues.md` (2026-05-19, Etapa 0) |
@@ -83,17 +81,7 @@ Convención: los worktrees viven **fuera** del repo principal (no pueden vivir a
 
 ## Pendientes que requieren decisión del usuario
 
-1. **M1: firma de `parse_tsv`** — sesión implementó `Iterator[ParsedRow]` en lugar de `Iterator[VerbalizationRow]` para poder reportar filas inválidas. Opciones:
-   - (a) Actualizar el contrato a `Iterator[ParsedRow]` y documentar el dataclass.
-   - (b) Refactorizar a `Iterator[VerbalizationRow]` + canal lateral (logging/callback) para inválidas.
-   - Recomendación de Claude: (a).
-
-2. **M1: `LoadReport.already_processed` no existe en el DTO** — sesión usa inferencia con `rows_inserted == 0 and rows_duplicated == rows_total`. Opciones:
-   - (a) Añadir la propiedad al DTO en `core/src/core/schemas.py`.
-   - (b) Aceptar la inferencia y eliminar mención del plan M-doc.
-   - Recomendación de Claude: (a).
-
-3. **`engine/pyproject.toml` no declara `jsonschema`** pero `engine.annotator` lo importa. Sin esta dep, los tests de annotator fallan con `No module named 'jsonschema'`. Trivial de arreglar con un commit `chore(engine): añadir jsonschema como dependencia`. No bloquea ninguna sesión pero las sesiones de M2b/M4 tropezarán al correr tests si no se arregla.
+(Ninguno actualmente. Los 3 pendientes anteriores — firma `parse_tsv`, `already_processed`, dep `jsonschema` — fueron resueltos en commit `da5958c` con la opción recomendada por Claude.)
 
 ---
 
