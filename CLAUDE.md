@@ -1,5 +1,7 @@
 # sentiment-analysis-banamex
 
+> **Antes de actuar en una sesión nueva, lee `docs/ESTADO.md`** para conocer la etapa actual del proyecto, decisiones recientes que sobrescriben contratos, pendientes y convenciones operacionales aprendidas. CLAUDE.md describe **qué es** el proyecto (estable); `docs/ESTADO.md` describe **dónde va** (volátil, se actualiza después de cada milestone).
+
 ## Descripción
 
 Reto de hackathon del Tec de Monterrey con caso real de **Banamex**: análisis de sentimientos sobre experiencia de cliente (CX) en sucursales, basado en corpora de texto entregados por el cliente del caso.
