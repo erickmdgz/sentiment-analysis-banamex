@@ -5,6 +5,14 @@ Subcomandos M2a:
     extract-metadata   Corre los 4 extractores rule-based sobre todas
                        las verbalizaciones sin metadata.
 
+Subcomandos M2b:
+    train              Entrena el clasificador supervisado sobre el golden set
+                       de una corrida de anotación y persiste el `.joblib`.
+    predict-all        Corre el clasificador sobre toda verbalization sin
+                       clasificación previa (batches de 1000).
+    predict-one        Utilidad de debug: clasifica un texto suelto y lo
+                       imprime como JSON.
+
 Diseño:
 - Cargar verbalizaciones desde un fixture CSV o desde la DB de M1 (vía
   `--db-url`). El fixture es lo que usan los tests; la DB es el flujo
@@ -20,6 +28,7 @@ import json
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -208,6 +217,163 @@ def cmd_extract_metadata(args: argparse.Namespace) -> int:
 
 
 # ============================================================================
+# Subcomandos M2b
+# ============================================================================
+
+
+def cmd_train(args: argparse.Namespace) -> int:
+    """Entrena el clasificador supervisado sobre el golden set."""
+    from . import trainer
+
+    engine_obj = _build_db_engine(args.db_url)
+    model_path = Path(args.model_path) if args.model_path else None
+    run = trainer.train(
+        annotation_run_id=args.annotation_run_id,
+        seed=args.seed,
+        engine=engine_obj,
+        model_path=model_path,
+    )
+    print(
+        json.dumps(
+            {
+                "classifier_run_id": run.id,
+                "model_path": run.model_path,
+                "trained_on_run_id": run.trained_on_run_id,
+                "trained_at": run.trained_at,
+                "n_samples": run.n_samples,
+                "n_labels": run.n_labels,
+                "n_samples_train": run.n_samples_train,
+                "n_samples_test": run.n_samples_test,
+                "f1_micro": run.f1_micro,
+                "f1_macro": run.f1_macro,
+                "hamming_loss": run.hamming_loss,
+                "subset_accuracy": run.subset_accuracy,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
+def cmd_predict_all(args: argparse.Namespace) -> int:
+    """Clasifica todas las verbalizations sin fila en `classifications`."""
+    from sqlalchemy import text as sql_text
+
+    from .classifier import Classifier, get_default_classifier
+
+    engine_obj = _build_db_engine(args.db_url)
+    model_path = Path(args.model_path) if args.model_path else None
+    if model_path is not None:
+        classifier = Classifier.load(model_path)
+    else:
+        classifier = get_default_classifier()
+
+    batch_size = args.batch_size
+    report_every = args.report_every
+
+    pending_query = (
+        "SELECT v.record_id, v.verbatim_clean, v.nps_group "
+        "FROM verbalizations v "
+        "LEFT JOIN classifications c ON v.record_id = c.record_id "
+        "WHERE c.id IS NULL "
+        "ORDER BY v.record_id"
+    )
+
+    with engine_obj.connect() as conn:
+        total_pending = conn.execute(
+            sql_text(
+                "SELECT COUNT(*) FROM verbalizations v "
+                "LEFT JOIN classifications c ON v.record_id = c.record_id "
+                "WHERE c.id IS NULL"
+            )
+        ).scalar_one()
+
+    print(f"# pendientes: {total_pending}")
+
+    processed = 0
+    start = time.time()
+    with engine_obj.connect() as conn:
+        result = conn.execution_options(stream_results=True).execute(sql_text(pending_query))
+        batch: list[tuple[str, str, str]] = []
+        for record_id, verbatim_clean, nps_group in result:
+            batch.append((record_id, verbatim_clean or "", nps_group))
+            if len(batch) >= batch_size:
+                _process_batch(batch, classifier, engine_obj)
+                processed += len(batch)
+                batch = []
+                if processed % report_every == 0:
+                    _log_progress(processed, total_pending, start)
+        if batch:
+            _process_batch(batch, classifier, engine_obj)
+            processed += len(batch)
+            _log_progress(processed, total_pending, start)
+
+    elapsed = time.time() - start
+    print(
+        json.dumps(
+            {
+                "processed": processed,
+                "elapsed_seconds": round(elapsed, 1),
+                "throughput_per_sec": round(processed / elapsed, 1) if elapsed > 0 else 0,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _process_batch(batch: list[tuple[str, str, str]], classifier: Any, engine_obj: Any) -> None:
+    from .pipeline import classify_batch, persist_classification
+
+    results = classify_batch(batch, classifier=classifier)
+    for result in results:
+        persist_classification(result, engine=engine_obj)
+
+
+def _log_progress(processed: int, total: int, start: float) -> None:
+    elapsed = max(time.time() - start, 1e-6)
+    rate = processed / elapsed
+    remaining = max(total - processed, 0)
+    eta = remaining / rate if rate > 0 else float("inf")
+    print(
+        f"[{processed}/{total}] {processed / max(total, 1) * 100:5.1f}% "
+        f"throughput={rate:6.1f} rec/s ETA={eta / 60:6.1f} min"
+    )
+
+
+def cmd_predict_one(args: argparse.Namespace) -> int:
+    """Clasifica un solo texto pasado por CLI (debug)."""
+    from .classifier import Classifier, get_default_classifier
+    from .pipeline import classify
+
+    if args.model_path:
+        classifier = Classifier.load(args.model_path)
+    else:
+        classifier = get_default_classifier()
+    result = classify(
+        record_id=args.record_id,
+        text=args.text,
+        nps_group=args.nps_group,
+        classifier=classifier,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _build_db_engine(db_url: str | None):  # noqa: ANN202
+    """Construye un engine SQLAlchemy. Usa `core.db.get_engine()` si no se pasa URL."""
+    if db_url:
+        from sqlalchemy import create_engine
+
+        return create_engine(db_url)
+    from core.db import get_engine
+
+    return get_engine()
+
+
+# ============================================================================
 # Persistencia (opcional, sólo cuando hay DB de M1)
 # ============================================================================
 
@@ -341,6 +507,59 @@ def build_parser() -> argparse.ArgumentParser:
         help="Filas a imprimir en stdout cuando no hay --output ni --db-url.",
     )
     em.set_defaults(func=cmd_extract_metadata)
+
+    # ------ train (M2b) ------
+    tr = sub.add_parser(
+        "train",
+        help="Entrena el clasificador supervisado sobre el golden set (M2b).",
+    )
+    tr.add_argument(
+        "--annotation-run-id",
+        type=int,
+        default=None,
+        help="ID en annotation_runs para trazabilidad (clasificator_runs.trained_on_run_id).",
+    )
+    tr.add_argument("--seed", type=int, default=42)
+    tr.add_argument("--db-url", type=str, default=None)
+    tr.add_argument(
+        "--model-path",
+        type=str,
+        default=None,
+        help="Ruta destino del .joblib. Default: data/models/classifier.joblib.",
+    )
+    tr.set_defaults(func=cmd_train)
+
+    # ------ predict-all (M2b) ------
+    pa = sub.add_parser(
+        "predict-all",
+        help="Clasifica toda verbalization sin fila en classifications (M2b).",
+    )
+    pa.add_argument("--db-url", type=str, default=None)
+    pa.add_argument(
+        "--model-path",
+        type=str,
+        default=None,
+        help="Ruta al .joblib. Default: el singleton de engine.classifier.",
+    )
+    pa.add_argument("--batch-size", type=int, default=1000)
+    pa.add_argument("--report-every", type=int, default=10000)
+    pa.set_defaults(func=cmd_predict_all)
+
+    # ------ predict-one (M2b) ------
+    po = sub.add_parser(
+        "predict-one",
+        help="Clasifica un texto individual (debug).",
+    )
+    po.add_argument("--text", type=str, required=True)
+    po.add_argument(
+        "--nps-group",
+        type=str,
+        required=True,
+        choices=("Promotor", "Pasivo", "Detractor"),
+    )
+    po.add_argument("--record-id", type=str, default="debug-1")
+    po.add_argument("--model-path", type=str, default=None)
+    po.set_defaults(func=cmd_predict_one)
 
     return p
 
