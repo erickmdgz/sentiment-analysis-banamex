@@ -105,3 +105,36 @@ Formato sugerido por entrada:
 **Resolución:** Añadido `already_processed: bool = False` al DTO `LoadReport` en `core/src/core/schemas.py` y reflejado en `01_contratos_compartidos.md §4`. El loader lo pobla con `True` cuando el `sha256` ya existía y con `False` cuando es un archivo nuevo. Test de loader extendido para validar el campo.
 
 ---
+
+## 2026-05-21 — M2b: fallback emite categoría con `is_classifiable=False` (contradicción interna del doc M2b)
+
+**Decisión/contrato afectado:** `04_M2b_clasificador.md` §10.II vs. §11 / §14.10, y `01_contratos_compartidos.md §4` (`ClassificationResult`).
+
+**Lo que el doc M2b dice (contradictorio internamente):**
+
+- §10.II declara: cuando `len(text_clean) < MIN_TEXT_LEN_CLASSIFIABLE` ⇒ `is_classifiable=False, categories=[]`.
+- §11 ("Regla de fallback") manda emitir L1=15/L2=15.1 cuando `text_clean < 10` chars (o L1=14/L2=14.1-14.2 según polaridad), sin excepción para `is_classifiable=False`.
+- §14.10 ("KPI de cobertura") exige que **toda verbalización tenga al menos una fila en `classifications`** (cobertura 100%), incluso las no clasificables.
+
+`01_contratos_compartidos.md §4` declara `is_classifiable: bool` y `categories: list[CategoryPrediction]` como campos **independientes**; no prohíbe categorías cuando `is_classifiable=False`.
+
+**Lo que la sesión implementó:**
+
+`engine/src/engine/pipeline.py:155-190` aplica la lectura §11 + §14.10:
+
+1. Calcula `is_classifiable = len(text_clean) >= MIN_TEXT_LEN_CLASSIFIABLE` (umbral 5).
+2. Si `is_classifiable=False`, salta embedding/inferencia y deja `categories=[]`.
+3. Antes de devolver, **todo** registro con `categories == []` (sea por `is_classifiable=False` o por probas bajas) recibe `_fallback_category(...)` con `confidence=0.0`, que emite L1∈{14,15} ("Otros" en `ui_buckets`).
+4. `persist_classification` marca esas filas con `source='fallback'` (vs. `'classifier'`).
+
+**Razón:** Cumplir el KPI §14.10 (cobertura 100% en `classifications`) y mantener la métrica de §10.II ("`is_classifiable=False`" sigue siendo señal cruda de "texto inservible para el modelo"). El campo `is_classifiable` se preserva como flag observacional; el campo `categories` deja de ser vacío para satisfacer la cobertura.
+
+**Por qué no rompe consumidores:**
+
+- M3 (`analytics/`) no consulta `is_classifiable`; agrega por `ui_bucket` y excluye explícitamente L1=14,15 (bucket "Otros") en `CAUSE_BUCKETS`, `STRENGTH_BUCKETS` y `BUCKET_KEYWORDS`. Las filas de fallback no aparecen en causes/strengths/impact.
+- M5 (`web/`) consume DTOs ya agregados por M3; nunca ve la categoría cruda.
+- Cero tests aguas abajo asumen `is_classifiable=False ⇒ categories=[]`.
+
+**Resolución:** Adoptada la lectura §11 + §14.10 (fallback siempre, incluso si `is_classifiable=False`). §10.II queda **obsoleta** en este punto: el código y la cobertura mandan. `01_contratos_compartidos.md §4` no necesita cambios — los campos son independientes y compatibles con esta lectura. Esta entrada documenta la divergencia; futuros consumidores deben asumir que `is_classifiable=False` puede coexistir con una `categories` no vacía (donde la fila se distingue por `source='fallback'` y `confidence=0.0`).
+
+---
