@@ -8,6 +8,8 @@ tags:
 # Estado del proyecto — sentiment-analysis-banamex
 
 > **Lee este archivo primero cuando arranques una sesión nueva.** Es la fuente de verdad viva del proyecto entre sesiones. CLAUDE.md describe **qué es** el proyecto (estable); este archivo describe **dónde va** (volátil, se actualiza después de cada milestone).
+>
+> Para visualización dinámica del grafo módulos / estados / dependencias en Obsidian (requiere Dataview), abre [[DASHBOARD]].
 
 **Última actualización:** 2026-05-21 (cierre de pendientes M1 + dep jsonschema, antes de lanzar Etapa 2)
 **Main HEAD:** `da5958c` (docs(plan): actualizar firma parse_tsv y cerrar entradas M1 resueltas)
