@@ -286,3 +286,31 @@ def tsv_path(tmp_path):
         for r in rows:
             f.write("\t".join(r) + "\n")
     return path
+
+
+@pytest.fixture(autouse=True)
+def _stub_classifier(monkeypatch):
+    """Reemplaza el clasificador supervisado de M2b por un stub vacío.
+
+    `Classifier.predict` retorna `[]` para cada texto, así `engine.pipeline.
+    classify_batch` cae a la rama de fallback (`_fallback_category`) para todos
+    los registros — los tests del API se ejercen end-to-end sin requerir un
+    `.joblib` entrenado.
+    """
+
+    class _StubClassifier:
+        def predict(self, texts):
+            return [[] for _ in texts]
+
+    from engine import classifier as engine_classifier
+    from engine import pipeline as engine_pipeline
+
+    stub = _StubClassifier()
+    monkeypatch.setattr(
+        engine_pipeline, "get_default_classifier", lambda *a, **kw: stub
+    )
+    monkeypatch.setattr(
+        engine_classifier, "get_default_classifier", lambda *a, **kw: stub
+    )
+    yield
+    engine_classifier.reset_default_classifier()

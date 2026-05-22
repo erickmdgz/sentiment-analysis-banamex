@@ -37,10 +37,14 @@ def _configure_logging() -> None:
 def _classifier_is_loaded() -> bool:
     """Indica si el clasificador supervisado (M2b) está disponible.
 
-    TODO: cuando M2b se mergee, verificar `data/models/classifier.joblib`.
-    Mientras tanto, el shim local (`api._classifier_shim`) está siempre disponible.
+    Resuelve la ruta del bundle igual que `engine.classifier.get_default_classifier`:
+    `CLASSIFIER_MODEL_PATH` o `data/models/classifier.joblib` por defecto.
     """
-    return False
+    import os
+    from pathlib import Path
+
+    path = Path(os.getenv("CLASSIFIER_MODEL_PATH") or "data/models/classifier.joblib")
+    return path.is_file()
 
 
 def create_app() -> FastAPI:

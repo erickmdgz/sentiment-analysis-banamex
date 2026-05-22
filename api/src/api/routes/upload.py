@@ -1,11 +1,8 @@
 """Router de upload: `POST /upload`, `GET /upload/{file_id}/status`.
 
 Recibe un `.txt` (TSV de Banamex), repite el pipeline M1 (parse → dedup), invoca
-el clasificador inline para las filas nuevas y rellena `metadata_extractions`.
-
-Hasta que M2b se mergee, la clasificación pasa por `api._classifier_shim`. Cuando
-M2b esté disponible, sustituir el import por `engine.pipeline.classify_batch`
-(misma firma y DTO `ClassificationResult`, ver `01 §7`).
+`engine.pipeline.classify_batch` para las filas nuevas y rellena
+`metadata_extractions`. DTO `ClassificationResult` definido en `01 §4 / §7`.
 """
 
 from __future__ import annotations
@@ -15,12 +12,12 @@ import tempfile
 from pathlib import Path
 
 from core.loader import load_file
+from engine.pipeline import classify_batch
 from engine.ui_buckets import assign_ui_bucket
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from .._classifier_shim import classify_batch
 from ..deps import get_current_user, get_db
 from ..dtos import UploadResponse, UploadStatusResponse
 from ..models_api import UserInfo, ValidationSummary
