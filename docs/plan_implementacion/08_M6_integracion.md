@@ -1,8 +1,9 @@
 ---
 tipo: m-doc
 modulo: M6
-estado: en-progreso
+estado: completado
 paquete: scripts
+pr: 8
 depende_de:
   - M1
   - M2a

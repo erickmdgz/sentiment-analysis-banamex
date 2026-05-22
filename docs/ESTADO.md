@@ -11,15 +11,15 @@ tags:
 >
 > Para visualización dinámica del grafo módulos / estados / dependencias en Obsidian (requiere Dataview), abre [[DASHBOARD]].
 
-**Última actualización:** 2026-05-21 (M6 entregado en `feat/m6-integration` — stack levanta con `docker compose up`, smoke E2E pasa, PR abierto)
-**Main HEAD:** `50b7beb` (Merge pull request #6 from erickmdgz/feat/m4-api)
+**Última actualización:** 2026-05-21 (Etapa 3 cerrada — PR #8 mergeado tras añadir 3 tests del parser date-first faltantes en el review)
+**Main HEAD:** `bb59335` (Merge pull request #8 from erickmdgz/feat/m6-integration)
 **Convención de actualización:** Claude actualiza este archivo después de cada milestone (cerrar PR, cerrar etapa, tomar decisión de contrato, descubrir convención operacional). Commit `docs(estado): ...`.
 
 ---
 
 ## Etapa actual
 
-**Etapa 3 — Entregada en branch.** M6 integró todo: `docker-compose.yml`, scripts (`preprocess_corpora`, `seed_db`, `smoke_test`, `generate_openapi_client`), `README_DEMO.md`. El flujo end-to-end se verificó localmente: `docker compose up` levanta API + Web sanos, `bash scripts/smoke_test.sh` pasa contra el stack vivo (473,771 verbalizaciones cargadas, 1,298 sucursales, 24 meses cubiertos). PR `feat/m6-integration` abierto, pendiente de merge.
+**Etapa 3 — Completa. MVP cerrado.** M6 integró todo: `docker-compose.yml`, scripts (`preprocess_corpora`, `seed_db`, `smoke_test`, `generate_openapi_client`), `README_DEMO.md`. El flujo end-to-end se verificó localmente: `docker compose up` levanta API + Web sanos, `bash scripts/smoke_test.sh` pasa contra el stack vivo (473,771 verbalizaciones cargadas, 1,298 sucursales, 24 meses cubiertos). Antes de mergear se añadieron 3 tests sintéticos al parser cubriendo el orden date-first + header skip (huecos identificados en el code review).
 
 Plan de orquestación completo: `~/.claude/plans/nuestro-plan-de-implementaci-n-misty-walrus.md` (no se versiona — vive en config local de Claude).
 
@@ -28,7 +28,7 @@ Etapa -1  ✓  Bootstrap git + GitHub privado                       (main, e2997
 Etapa 0   ✓  Setup de contratos y stubs                           (PR #1 → 9d64f01)
 Etapa 1   ✓  M1, M2a, M3, M5 paralelos                            (PRs #2/3/4/5)
 Etapa 2   ✓  M2b, M4 paralelos                                    (PRs #7/6)
-Etapa 3   ⏳ M6 integración Docker + scripts + demo               (PR feat/m6-integration abierto)
+Etapa 3   ✓  M6 integración Docker + scripts + demo               (PR #8 → bb59335)
 ```
 
 ---
@@ -37,10 +37,9 @@ Etapa 3   ⏳ M6 integración Docker + scripts + demo               (PR feat/m6-
 
 ```
 sentiment-analysis-banamex/        [main]
-sentiment-wt-m6/                   [feat/m6-integration]  (PR abierto, remover tras merge)
 ```
 
-Los worktrees de Etapa 2 (`sentiment-wt-m2b` y `sentiment-wt-m4`) fueron removidos tras el merge. Los SHAs específicos se obtienen con `git worktree list`.
+Los worktrees de Etapa 2 (`sentiment-wt-m2b`, `sentiment-wt-m4`) y de Etapa 3 (`sentiment-wt-m6`) fueron removidos tras sus respectivos merges. Los SHAs específicos se obtienen con `git worktree list`.
 
 Convención: los worktrees viven **fuera** del repo principal (no pueden vivir adentro — git lo rechaza). Cuando se cierra un PR de un worktree, removerlo con `git worktree remove <path>` y eliminar la rama local con `git branch -D <branch>`.
 
@@ -59,18 +58,17 @@ Convención: los worktrees viven **fuera** del repo principal (no pueden vivir a
 | #5 | M5 — frontend React SPA | `ea3f0b8` | 2026-05-21 |
 | #7 | M2b — clasificador supervisado + pipeline público | `ad255c2` | 2026-05-21 |
 | #6 | M4 — API FastAPI (HTTP wrapper) | `50b7beb` | 2026-05-21 |
+| #8 | M6 — integración Docker + scripts + demo | `bb59335` | 2026-05-21 |
 
 ### Abiertos
 
-- **`feat/m6-integration`** — M6 (Etapa 3). Stack desplegable con `docker compose up`. Smoke test E2E pasa contra el stack vivo. Verificación manual de las 7 pantallas del SPA pendiente del usuario (el harness automatizado no abre navegador). Ver "Próximos pasos" abajo.
+(Ninguno. MVP cerrado.)
 
 ---
 
 ## Próximos pasos
 
-1. **Mergear PR `feat/m6-integration`.**
-   - Verificación humana antes de mergear: abrir `http://localhost:3000` y recorrer las 7 pantallas del SPA (login → upload → nacional → sucursal crítica → comparación de meses → admin/files → admin/runs).
-   - Tras el merge: `git worktree remove ../sentiment-wt-m6 && git branch -D feat/m6-integration`.
+1. **Verificación manual del SPA en navegador.** El stack se baja después del smoke; para volver a levantarlo: `docker compose up -d`. Abrir `http://localhost:3000` y recorrer las 7 pantallas (login → upload → nacional → sucursal crítica → comparación de meses → admin/files → admin/runs).
 
 2. **Para correr el clasificador real con datos reales** (operativo del usuario, no de M6):
    - Asegurar Ollama corriendo.
