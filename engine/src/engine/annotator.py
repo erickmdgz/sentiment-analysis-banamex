@@ -302,8 +302,20 @@ async def _preflight(client: OllamaLike, model: str) -> None:
             "No se pudo contactar Ollama. Asegúrate de que 'ollama serve' esté corriendo."
         ) from exc
 
-    models = info.get("models", []) if isinstance(info, dict) else []
-    names = {m.get("name") or m.get("model") for m in models if isinstance(m, dict)}
+    # ollama-python pre-0.5 devolvía dict; >=0.5 devuelve `ListResponse` Pydantic
+    # con `info.models = list[Model]` donde cada Model expone `.model` (no `.name`).
+    if isinstance(info, dict):
+        raw_models = info.get("models", [])
+    else:
+        raw_models = getattr(info, "models", []) or []
+    names: set[str] = set()
+    for m in raw_models:
+        if isinstance(m, dict):
+            n = m.get("name") or m.get("model")
+        else:
+            n = getattr(m, "model", None) or getattr(m, "name", None)
+        if n:
+            names.add(n)
     # Algunas versiones devuelven `qwen2.5:7b-instruct` con sufijos como `:latest`.
     if model not in names and f"{model}:latest" not in names:
         raise RuntimeError(
