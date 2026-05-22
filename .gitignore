@@ -56,6 +56,12 @@ bin/
 tmp/
 temp/
 
+# Obsidian — caches y workspace local. Mantenemos versionado el resto de
+# .obsidian/ para compartir config + plugins instalados entre máquinas.
+.obsidian/workspace*
+.obsidian/cache
+.obsidian/plugins/*/data.json
+
 # Datos crudos y derivados del reto (pesados / sensibles, no versionar)
 data/raw/
 data/processed/
