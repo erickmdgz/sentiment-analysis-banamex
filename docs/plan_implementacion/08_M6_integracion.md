@@ -1,7 +1,7 @@
 ---
 tipo: m-doc
 modulo: M6
-estado: pendiente
+estado: en-progreso
 paquete: scripts
 depende_de:
   - M1

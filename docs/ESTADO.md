@@ -160,6 +160,12 @@ Detectados durante reviews de Etapa 2; ninguno bloquea Etapa 3 ni el MVP. Regist
 - `--force-with-lease` requiere confirmación del usuario (regla global CLAUDE.md sobre comandos destructivos), aunque sea más seguro que `--force`.
 - Tras el merge del rebase, removerlo del worktree (`git worktree remove`) y `git branch -D <branch>`. `gh pr merge --delete-branch` falla cosméticamente mientras el worktree sigue activo.
 
+### Sincronizar el DASHBOARD de Obsidian al cerrar PRs
+
+- `docs/DASHBOARD.md` se renderiza con Dataview leyendo el **frontmatter YAML** de cada M-doc en `docs/plan_implementacion/`. Campos relevantes: `estado` (`pendiente` / `en-progreso` / `completado`) y `pr` (número del PR mergeado).
+- **Al mergear un PR de un módulo, actualizar el frontmatter del M-doc correspondiente** (no solo el ESTADO.md). Cambiar `estado:` a `completado` y añadir `pr: <N>`. El dashboard refleja el cambio sin tocarlo.
+- Cuando una sesión arranca un módulo (worktree creado), si el M-doc todavía dice `estado: pendiente`, ajustar a `en-progreso` al inicio. Esto da una vista de "qué se está haciendo ahora mismo".
+
 ### Tests del API con el clasificador real
 
 - M4 tiene un fixture autouse `_stub_classifier` en `api/tests/conftest.py` que monkeypatchea `engine.pipeline.get_default_classifier` por un stub que retorna `[[]for _ in texts]`. Resultado: `pipeline.classify_batch` aplica el fallback de M2b para todos los items y los tests del API no requieren un `.joblib` entrenado.

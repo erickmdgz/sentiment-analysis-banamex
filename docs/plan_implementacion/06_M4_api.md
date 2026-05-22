@@ -1,8 +1,9 @@
 ---
 tipo: m-doc
 modulo: M4
-estado: en-progreso
+estado: completado
 paquete: api
+pr: 6
 depende_de:
   - M3
   - M2b
