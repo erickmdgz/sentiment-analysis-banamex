@@ -255,6 +255,19 @@ def train(
 
         engine = get_engine()
 
+    if annotation_run_id is not None:
+        with engine.connect() as conn:
+            exists = conn.execute(
+                text("SELECT 1 FROM annotation_runs WHERE id = :id"),
+                {"id": annotation_run_id},
+            ).first()
+        if not exists:
+            raise ValueError(
+                f"annotation_run_id={annotation_run_id} no existe en annotation_runs. "
+                f"Lista runs disponibles con: sqlite3 <db_path> "
+                "'SELECT id, status, sample_size FROM annotation_runs;'"
+            )
+
     out_path = Path(model_path) if model_path else DEFAULT_MODEL_PATH
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
