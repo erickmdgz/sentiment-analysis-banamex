@@ -1,3 +1,11 @@
+---
+tipo: contrato-congelado
+seccion: "00"
+tags:
+  - plan-implementacion
+  - contrato
+---
+
 # 00 — Decisiones técnicas
 
 Este archivo lista las decisiones técnicas ya tomadas y validadas para el MVP. Toda sesión de implementación lo lee antes de empezar. Cada decisión tiene cuatro partes: **Decisión** (qué se hace), **Razón** (por qué), **Alternativa descartada** (qué no se hace y por qué), **Implicación** (cómo afecta a quien implementa).

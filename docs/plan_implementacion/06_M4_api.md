@@ -1,3 +1,16 @@
+---
+tipo: m-doc
+modulo: M4
+estado: en-progreso
+paquete: api
+depende_de:
+  - M3
+  - M2b
+tags:
+  - plan-implementacion
+  - modulo-m4
+---
+
 # M4 — API HTTP (FastAPI)
 
 Este documento describe el módulo M4, que expone la API HTTP del MVP. Se apoya en `00_decisiones_tecnicas.md` (en adelante `00`) y `01_contratos_compartidos.md` (en adelante `01`) como fuentes de verdad.

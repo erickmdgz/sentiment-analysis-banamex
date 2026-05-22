@@ -1,3 +1,11 @@
+---
+tipo: contrato-congelado
+seccion: "01"
+tags:
+  - plan-implementacion
+  - contrato
+---
+
 # 01 — Contratos compartidos
 
 Este archivo es la **fuente única de verdad** para todos los contratos entre módulos: estructura de carpetas, schema SQLite, schemas Pydantic/TypeScript compartidos, schema JSON del motor, API Python pública del motor, endpoints HTTP, y el mapeo taxonomía → buckets UI.

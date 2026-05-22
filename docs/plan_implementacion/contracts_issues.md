@@ -1,3 +1,10 @@
+---
+tipo: contracts-issues
+tags:
+  - plan-implementacion
+  - decisiones
+---
+
 # Dudas y conflictos de contratos
 
 Cada sesión paralela anota aquí dudas que detecte sobre `00_decisiones_tecnicas.md` o `01_contratos_compartidos.md`. **No modifiques los contratos directamente** — anota y sigue con la decisión vigente. El usuario integra los issues al final de cada etapa.

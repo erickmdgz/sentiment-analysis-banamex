@@ -1,3 +1,10 @@
+---
+tipo: riesgos-y-demo
+tags:
+  - plan-implementacion
+  - cierre
+---
+
 # 09 — Riesgos del proyecto y guion de la demo
 
 Este documento concentra los riesgos agregados del proyecto, el guion paso a paso de la demo, los riesgos específicos del día de la presentación y el plan B si algo falla en vivo. Es el referente operativo de cierre: cuando todos los módulos están integrados, esta es la guía que se ejecuta.

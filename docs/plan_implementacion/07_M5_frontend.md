@@ -1,3 +1,14 @@
+---
+tipo: m-doc
+modulo: M5
+estado: completado
+paquete: web
+pr: 5
+tags:
+  - plan-implementacion
+  - modulo-m5
+---
+
 # M5 — Frontend (SPA React)
 
 ## Responsabilidad

@@ -1,3 +1,10 @@
+---
+tipo: estado-proyecto
+tags:
+  - fuente-de-verdad-viva
+  - pivote
+---
+
 # Estado del proyecto — sentiment-analysis-banamex
 
 > **Lee este archivo primero cuando arranques una sesión nueva.** Es la fuente de verdad viva del proyecto entre sesiones. CLAUDE.md describe **qué es** el proyecto (estable); este archivo describe **dónde va** (volátil, se actualiza después de cada milestone).

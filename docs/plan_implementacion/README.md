@@ -1,3 +1,10 @@
+---
+tipo: indice-plan
+tags:
+  - plan-implementacion
+  - meta
+---
+
 # Plan de implementación — MVP Hackathon CX Banamex
 
 Esta carpeta contiene el plan de implementación detallado del MVP. Es la fuente única de verdad para todas las sesiones de Claude que vayan a implementar código del proyecto.

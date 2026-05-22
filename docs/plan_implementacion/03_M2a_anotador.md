@@ -1,3 +1,14 @@
+---
+tipo: m-doc
+modulo: M2a
+estado: completado
+paquete: engine
+pr: 3
+tags:
+  - plan-implementacion
+  - modulo-m2a
+---
+
 # M2a — Motor: anotador LLM + extractores de metadatos
 
 Este documento detalla la planeación del módulo **M2a**, que provee dos componentes del paquete `engine`: el **anotador LLM** (que produce el golden set sobre una muestra estratificada de 5,000 verbalizaciones) y los **extractores rule-based** de los 4 metadatos transversales (que se aplican sobre las 474k verbalizaciones).

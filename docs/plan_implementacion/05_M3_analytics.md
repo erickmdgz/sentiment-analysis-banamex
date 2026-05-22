@@ -1,3 +1,14 @@
+---
+tipo: m-doc
+modulo: M3
+estado: completado
+paquete: analytics
+pr: 4
+tags:
+  - plan-implementacion
+  - modulo-m3
+---
+
 # M3 — Capa de analytics
 
 ## Responsabilidad

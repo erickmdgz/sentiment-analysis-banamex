@@ -1,3 +1,14 @@
+---
+tipo: m-doc
+modulo: M1
+estado: completado
+paquete: core
+pr: 2
+tags:
+  - plan-implementacion
+  - modulo-m1
+---
+
 # M1 — Núcleo de datos
 
 ## Responsabilidad

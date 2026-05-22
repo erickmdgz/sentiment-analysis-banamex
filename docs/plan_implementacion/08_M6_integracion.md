@@ -1,3 +1,20 @@
+---
+tipo: m-doc
+modulo: M6
+estado: pendiente
+paquete: scripts
+depende_de:
+  - M1
+  - M2a
+  - M2b
+  - M3
+  - M4
+  - M5
+tags:
+  - plan-implementacion
+  - modulo-m6
+---
+
 # M6 — Integración y demo
 
 > Este módulo es la **última sesión** del plan. Se ejecuta cuando M1, M2a, M2b, M3, M4 y M5 ya entregaron. Antes de empezar, leer `00_decisiones_tecnicas.md` (especialmente §20 Empaquetado de demo, §21 Pre-procesamiento, §22 Upload en runtime, §24 Tests E2E, Anexo A variables de entorno) y `01_contratos_compartidos.md` (§1 estructura, §8 endpoints, §13 tests).

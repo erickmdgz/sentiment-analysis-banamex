@@ -1,3 +1,16 @@
+---
+tipo: m-doc
+modulo: M2b
+estado: en-progreso
+paquete: engine
+depende_de:
+  - M2a
+  - M1
+tags:
+  - plan-implementacion
+  - modulo-m2b
+---
+
 # M2b — Motor: clasificador supervisado y pipeline público
 
 ## Responsabilidad
