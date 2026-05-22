@@ -185,3 +185,49 @@ Formato sugerido por entrada:
 **Resolución:** Al mergear M2b a main (PR #7), el rebase de M4 sustituyó el import de `api._classifier_shim` por `engine.pipeline.classify_batch` (firma idéntica, parámetro opcional `classifier` keyword-only). El módulo `_classifier_shim.py` fue eliminado. La función `extract_all` ya se invocaba directamente de `engine.extractors`. Sustitución completada en el mismo rebase, sin cambios de schema ni de DTOs.
 
 ---
+
+## 2026-05-21 — M6: ajustes de integración (orden de columnas TSV, CORS, Vite build arg, `openapi.json` ↔ `schema.d.ts`)
+
+**Decisión/contrato afectado:** `02_M1_datos.md` (parser TSV), `01_contratos_compartidos.md §8` (CORS), `08_M6_integracion.md` (Vite build arg), `01_contratos_compartidos.md §10` (cliente TS).
+
+**Contexto:** M6 ejecutó el flujo end-to-end por primera vez con los corpora reales y descubrió cuatro discrepancias menores que se resolvieron como ajustes de integración. Ninguna requirió cambios de schema, DTOs ni de la lógica de dominio de los módulos M1-M5.
+
+### (1) Orden de columnas TSV: fixture sintética ≠ corpora reales
+
+**Lo que el parser esperaba** (`core/src/core/parser.py`, fixture `core/tests/fixtures/sample.tsv`):
+
+```
+record_id  response_date  nps_group  nps_rate  verbatim  branch_id
+```
+
+**Lo que los corpora reales (`data/raw/*.txt`) traen**, según los bytes inspeccionados:
+
+```
+Fecha respuesta  NPS_GROUP  NPS_Rate  Verbalizacion  RecordId  Id_branch
+```
+
+Es decir: orden distinto (date-first) y **header row** que la fixture no tenía. Sin el fix, `parse_tsv` invalidaba el 100% de las filas reales con `nps_group inválido: '10'` (leía nps_rate como nps_group por el offset).
+
+**Lo que M6 hizo:** parser auto-detecta el orden vía heurística (¿la columna 0 luce fecha?) y skipea la primera fila si todos sus tokens están en `_HEADER_TOKENS`. Ambos órdenes quedan soportados: la fixture sintética sigue funcionando (29 tests de M1 verdes tras el fix), y los corpora reales se cargan (473,771 verbalizaciones, 1,298 sucursales, rango 2025-01-01 → 2026-12-04). El cambio vive en `core/src/core/parser.py`: nuevas constantes `_HEADER_TOKENS`, `_ORDER_*`; nuevas funciones `_is_header_row`, `_detect_order`, `_scan_corpus`; firma de `_coerce_to_six_columns`, `_detect_date_format_from_file` y `_normalize_row` extendida con `verbatim_idx`/`fixed_tail_len`. Pendiente post-MVP: actualizar fixture sintética al orden real y los tests de parser para reflejar que la fixture es representativa del corpus.
+
+### (2) CORS no permitía `http://localhost:3000`
+
+`api/src/api/main.py` declaraba `allow_origins=["http://localhost:5173", "http://localhost"]`. El stack de demo expone el frontend en `:3000`, no `:5173` (Vite dev) ni `:80` (sin puerto). Sin el fix, el navegador bloquearía las llamadas con error CORS.
+
+**Lo que M6 hizo:** añadió `"http://localhost:3000"` al `allow_origins` de la API. Cambio de una línea.
+
+### (3) Vite necesita `VITE_API_URL` en build, no en runtime
+
+`web/Dockerfile` sólo declaraba `ENV VITE_USE_MOCKS=false` antes del `npm run build`. Como Vite inyecta `import.meta.env.VITE_API_URL` **en build**, el contenedor producido no sabía a qué URL pegarle.
+
+**Lo que M6 hizo:** añadió `ARG VITE_API_URL=http://localhost:8000` + `ENV VITE_API_URL=${VITE_API_URL}` al `web/Dockerfile`. `docker-compose.yml` pasa el valor como build arg, y por default apunta a `http://localhost:8000` (overrideable vía `.env`).
+
+### (4) `openapi.json` regenerado ↔ `schema.d.ts` hand-written de M5
+
+El `web/src/api/schema.d.ts` que M5 entregó es **hand-crafted** con `export type Foo = ...` PascalCase. El archivo que produce `openapi-typescript` usa `components["schemas"]["Foo"]`. Regenerar con `scripts/generate_openapi_client.sh` rompe el build del frontend en ~30 imports.
+
+**Lo que M6 hizo:** mantuvo el `schema.d.ts` hand-written como está, y dejó `scripts/generate_openapi_client.sh` como herramienta disponible (con instalación de deps y todo), pero **fuera del flujo de build por defecto**. Cuando M5 migre a consumir tipos en la forma `components["schemas"]["..."]`, este script se vuelve útil; mientras tanto, se deja documentado en `README_DEMO.md` y en su propio header como herramienta opcional. Pendiente post-MVP: migrar M5 a la forma generada.
+
+**Estado:** Ajustes documentados, código emitido en el branch `feat/m6-integration`. Ninguno modifica DTOs, schema SQL ni la lógica de dominio. Los tests existentes pasan tras los fixes.
+
+---

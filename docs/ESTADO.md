@@ -11,7 +11,7 @@ tags:
 >
 > Para visualización dinámica del grafo módulos / estados / dependencias en Obsidian (requiere Dataview), abre [[DASHBOARD]].
 
-**Última actualización:** 2026-05-21 (cierre Etapa 2 — M2b y M4 mergeados, antes de lanzar Etapa 3)
+**Última actualización:** 2026-05-21 (M6 entregado en `feat/m6-integration` — stack levanta con `docker compose up`, smoke E2E pasa, PR abierto)
 **Main HEAD:** `50b7beb` (Merge pull request #6 from erickmdgz/feat/m4-api)
 **Convención de actualización:** Claude actualiza este archivo después de cada milestone (cerrar PR, cerrar etapa, tomar decisión de contrato, descubrir convención operacional). Commit `docs(estado): ...`.
 
@@ -19,7 +19,7 @@ tags:
 
 ## Etapa actual
 
-**Etapa 2 — Completa.** M2b (clasificador supervisado) y M4 (API FastAPI) mergeados. M4 fue rebaseado sobre el main post-M2b y su shim local `api._classifier_shim` fue sustituido por `engine.pipeline.classify_batch` en el mismo rebase. Próximo: lanzar Etapa 3 (M6) en un worktree único.
+**Etapa 3 — Entregada en branch.** M6 integró todo: `docker-compose.yml`, scripts (`preprocess_corpora`, `seed_db`, `smoke_test`, `generate_openapi_client`), `README_DEMO.md`. El flujo end-to-end se verificó localmente: `docker compose up` levanta API + Web sanos, `bash scripts/smoke_test.sh` pasa contra el stack vivo (473,771 verbalizaciones cargadas, 1,298 sucursales, 24 meses cubiertos). PR `feat/m6-integration` abierto, pendiente de merge.
 
 Plan de orquestación completo: `~/.claude/plans/nuestro-plan-de-implementaci-n-misty-walrus.md` (no se versiona — vive en config local de Claude).
 
@@ -28,7 +28,7 @@ Etapa -1  ✓  Bootstrap git + GitHub privado                       (main, e2997
 Etapa 0   ✓  Setup de contratos y stubs                           (PR #1 → 9d64f01)
 Etapa 1   ✓  M1, M2a, M3, M5 paralelos                            (PRs #2/3/4/5)
 Etapa 2   ✓  M2b, M4 paralelos                                    (PRs #7/6)
-Etapa 3   ⏳ M6 integración Docker + scripts + demo               (worktree por crear)
+Etapa 3   ⏳ M6 integración Docker + scripts + demo               (PR feat/m6-integration abierto)
 ```
 
 ---
@@ -37,7 +37,7 @@ Etapa 3   ⏳ M6 integración Docker + scripts + demo               (worktree po
 
 ```
 sentiment-analysis-banamex/        [main]
-sentiment-wt-m6/                   [feat/m6-integration]  (por crear)
+sentiment-wt-m6/                   [feat/m6-integration]  (PR abierto, remover tras merge)
 ```
 
 Los worktrees de Etapa 2 (`sentiment-wt-m2b` y `sentiment-wt-m4`) fueron removidos tras el merge. Los SHAs específicos se obtienen con `git worktree list`.
@@ -62,20 +62,17 @@ Convención: los worktrees viven **fuera** del repo principal (no pueden vivir a
 
 ### Abiertos
 
-(Ninguno actualmente. Próximo: PR de M6 cuando se lance la sesión de Etapa 3.)
+- **`feat/m6-integration`** — M6 (Etapa 3). Stack desplegable con `docker compose up`. Smoke test E2E pasa contra el stack vivo. Verificación manual de las 7 pantallas del SPA pendiente del usuario (el harness automatizado no abre navegador). Ver "Próximos pasos" abajo.
 
 ---
 
 ## Próximos pasos
 
-1. **Crear worktree `sentiment-wt-m6` y lanzar sesión M6 (Etapa 3).**
-   - Branch: `feat/m6-integration` desde main actual (`50b7beb`).
-   - Prompt en el plan de orquestación / `docs/plan_implementacion/07_M6_integracion.md` (si existe; verificar en la carpeta).
-   - Alcance esperado: Docker compose (api + frontend + ollama opcional), scripts de demo end-to-end, ajuste del comando `docker build` (ver decisión 2026-05-21 sobre `-f api/Dockerfile .`).
+1. **Mergear PR `feat/m6-integration`.**
+   - Verificación humana antes de mergear: abrir `http://localhost:3000` y recorrer las 7 pantallas del SPA (login → upload → nacional → sucursal crítica → comparación de meses → admin/files → admin/runs).
+   - Tras el merge: `git worktree remove ../sentiment-wt-m6 && git branch -D feat/m6-integration`.
 
-2. **Pendiente humano antes/durante M6**: verificar `docker build` (Docker daemon estuvo apagado al cerrar M4).
-
-3. **Para correr el clasificador real con datos reales** (no es trabajo de M6, es operativo del usuario):
+2. **Para correr el clasificador real con datos reales** (operativo del usuario, no de M6):
    - Asegurar Ollama corriendo.
    - `python -m engine.cli annotate-sample --size 5000 --persist-db` (golden set sobre los corpora de Banamex).
    - `python -m engine.cli train --annotation-run-id <N>` → produce `data/models/classifier.joblib`.
@@ -90,6 +87,7 @@ Convención: los worktrees viven **fuera** del repo principal (no pueden vivir a
 | 2026-05-21 | M2b emite categoría de fallback (L1∈{14,15}, `confidence=0.0`) incluso cuando `is_classifiable=False`, satisfaciendo §11/§14.10 sobre §10.II del doc M2b. `01 §4` permite `is_classifiable=False` + `categories` no vacío como independientes. M3 (analytics) y M5 (web) excluyen L1=14,15 vía `ui_bucket="Otros"`, sin tests aguas abajo afectados. | `contracts_issues.md` (2026-05-21, M2b) |
 | 2026-05-21 | `engine.mocks` no existía en main cuando M4 se implementó; M4 usó shim local `api._classifier_shim` durante Etapa 2. Tras el merge de M2b, M4 fue rebaseado y el shim sustituido por `engine.pipeline.classify_batch` (firma idéntica, parámetro opcional `classifier` kwarg-only). `_classifier_shim.py` eliminado. | `contracts_issues.md` (2026-05-21, M4 — RESUELTO) |
 | 2026-05-21 | `docker build -t banamex-api ./api` (DoD de `06_M4_api.md`) es incompatible con el Dockerfile del contrato que hace `COPY core/ engine/ analytics/`. El comando correcto es `docker build -t banamex-api -f api/Dockerfile .` desde repo root. M6 ajusta `docker-compose.yml` y los scripts de demo. | `contracts_issues.md` (2026-05-21, M4) |
+| 2026-05-21 | M6: cuatro ajustes de integración descubiertos en la primera corrida E2E con corpora reales. (1) Parser de M1 esperaba orden de columnas distinto al de los corpora reales y no skipeaba header; ahora auto-detecta. (2) CORS del API no permitía `http://localhost:3000`; añadido. (3) `web/Dockerfile` no propagaba `VITE_API_URL`; ahora lo recibe como build ARG. (4) Regenerar `schema.d.ts` con `openapi-typescript` rompe ~30 imports de M5 (hand-written PascalCase vs. `components["schemas"]`); el script `scripts/generate_openapi_client.sh` se mantiene como herramienta pero **no se ejecuta en el flujo de build por defecto** hasta que M5 migre. | `contracts_issues.md` (2026-05-21, M6) |
 | 2026-05-21 | DTO `LoadReport` ampliado con `already_processed: bool = False`. Cierra pendiente M1. | Commit `da5958c` (commit 2 del bundle: `feat(core): ...`) |
 | 2026-05-21 | Firma autoritativa de `parse_tsv` actualizada a `Iterator[ParsedRow]` (dataclass interno con `is_valid`/`error`/`row`). Cierra pendiente M1. | Commit `da5958c` (commit 3 del bundle: `docs(plan): ...`) |
 | 2026-05-21 | `jsonschema>=4.0` añadido como dependencia de `engine/pyproject.toml` (lo importa `engine.annotator`). | Commit `da5958c` (commit 1 del bundle: `chore(engine): ...`) |
@@ -122,8 +120,16 @@ Detectados durante reviews de Etapa 2; ninguno bloquea Etapa 3 ni el MVP. Regist
 - Dockerfile corre como root (sin `USER appuser`). Aceptable para MVP; M6 puede agregarlo.
 - Colisión de archivos temporales en uploads concurrentes: `api/src/api/routes/upload.py:55` usa `f"upload-{_safe_name(file.filename)}"`, así que dos requests con el mismo nombre se pisan. Fix sugerido: `tempfile.NamedTemporaryFile(delete=False)` o prefijar con UUID.
 - `.env.example` declara `JWT_SECRET=cambia-esto-en-produccion-pero-en-mvp-da-igual`, idéntico al default de `api/src/api/settings.py:13`. Si alguien deploya sin `.env`, el secret queda hardcodeado. Aceptable en MVP pero rompe en producción.
-- `docker build` no verificado por el autor de M4 (Docker daemon apagado). Pendiente humano: ejecutar `docker build -t banamex-api -f api/Dockerfile .` antes o durante M6.
+- `docker build` verificado en M6 con `docker compose build` (api+web). Cierra el pendiente humano que quedaba abierto al cerrar M4.
 - `/auth/login` sin rate-limit ni log de intentos. Coherente con MVP (cualquier user/pass válido por `00 §18`); post-MVP.
+
+**M1 / core (descubierto en M6):**
+
+- Fixture sintética `core/tests/fixtures/sample.tsv` no replica el orden de columnas real de los corpora de Banamex (date-first con header). M6 ajustó el parser para auto-detectar ambos órdenes y skipear header. Pendiente post-MVP: regenerar la fixture con el orden real para que los tests sean representativos.
+
+**M5 / web (descubierto en M6):**
+
+- `web/src/api/schema.d.ts` es hand-written con exports PascalCase; `openapi-typescript` genera la forma `components["schemas"]["..."]`. Regenerar rompe ~30 imports. M6 dejó `scripts/generate_openapi_client.sh` listo pero **fuera del flujo de build**. Migración a la forma generada queda como pendiente post-MVP.
 
 ---
 

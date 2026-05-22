@@ -50,6 +50,21 @@ _DATE_SAMPLE_SIZE = 100
 _WS_RE = re.compile(r"\s+")
 _DATE_RE = re.compile(r"^\s*(\d{1,2})/(\d{1,2})/\d{2,4}\s*$")
 
+# Orden de columnas. La fixture sintética de M1 (sample.tsv) usa el orden
+# "record_id-first"; los corpora reales de Banamex usan el orden "date-first"
+# con un header. El parser detecta automáticamente cuál es y skipea header
+# cuando aplique. Ver `contracts_issues.md` entrada 2026-05-21 (M6) sobre
+# discrepancia en orden de columnas entre fixture y datos reales.
+_ORDER_RECORD_FIRST = ("record_id", "date", "nps_group", "nps_rate", "verbatim", "branch_id")
+_ORDER_DATE_FIRST = ("date", "nps_group", "nps_rate", "verbatim", "record_id", "branch_id")
+_HEADER_TOKENS = {
+    "fecha", "fecha respuesta", "fecha_respuesta",
+    "recordid", "record_id", "id_record",
+    "nps_group", "nps_rate", "nps",
+    "verbalizacion", "verbatim",
+    "id_branch", "branch", "branch_id",
+}
+
 
 @dataclass(slots=True)
 class ParsedRow:
@@ -98,35 +113,105 @@ def _read_normalized(path: Path) -> str:
     return text_content.replace("", "\n")
 
 
-def _detect_date_format_from_file(path: Path) -> str:
-    samples: list[str] = []
+def _is_header_row(row: list[str]) -> bool:
+    """Heurística: una fila es header si todos sus tokens (lower, stripped)
+    coinciden con tokens conocidos de header, y ningún campo parece dato real
+    (sin dígitos, sin record_id reconocible).
+    """
+    if not row:
+        return False
+    norm = [c.strip().lower() for c in row]
+    if any(_DATE_RE.match(c) for c in norm):
+        return False
+    return all(c in _HEADER_TOKENS for c in norm if c)
+
+
+def _detect_order(rows_sample: list[list[str]]) -> tuple[int, int]:
+    """Devuelve ``(verbatim_idx, fixed_tail_len)`` según el orden detectado.
+
+    Si la columna 0 luce fecha (DD/MM/YYYY o MM/DD/YYYY) en la mayoría de filas
+    del sample → orden "date-first" (corpora reales): verbatim en idx 3,
+    cola fija de 2 (record_id, branch_id). De lo contrario → orden
+    "record_id-first" (fixture sintética): verbatim en idx 4, cola fija de 1
+    (branch_id).
+    """
+    if not rows_sample:
+        return 4, 1
+    date_first = 0
+    for r in rows_sample:
+        if r and _DATE_RE.match(r[0]):
+            date_first += 1
+    if date_first * 2 >= len(rows_sample):  # mayoría
+        return 3, 2
+    return 4, 1
+
+
+def _scan_corpus(path: Path) -> tuple[int, int, bool]:
+    """Pre-scan: determina ``(verbatim_idx, fixed_tail_len, has_header)``.
+
+    Lee hasta ``_DATE_SAMPLE_SIZE`` filas; ignora la primera si parece header.
+    """
     reader = csv.reader(io.StringIO(_read_normalized(path)), delimiter="\t", quoting=csv.QUOTE_MINIMAL)
+    first_row: list[str] | None = None
+    samples: list[list[str]] = []
     for raw in reader:
-        row = _coerce_to_six_columns(raw)
-        if row is None or len(row) < 2:
+        if first_row is None:
+            first_row = raw
             continue
-        if row[1].strip():
-            samples.append(row[1])
+        if raw:
+            samples.append(raw)
+        if len(samples) >= _DATE_SAMPLE_SIZE:
+            break
+    has_header = bool(first_row) and _is_header_row(first_row)
+    if not has_header and first_row is not None:
+        samples.insert(0, first_row)
+    verbatim_idx, fixed_tail_len = _detect_order(samples[:_DATE_SAMPLE_SIZE])
+    return verbatim_idx, fixed_tail_len, has_header
+
+
+def _detect_date_format_from_file(
+    path: Path, verbatim_idx: int, fixed_tail_len: int, has_header: bool
+) -> str:
+    """Resuelve el formato de fecha. ``date_col`` es ``0`` si es date-first
+    o ``1`` si es record-first."""
+    samples: list[str] = []
+    date_col = 0 if (verbatim_idx == 3) else 1
+    reader = csv.reader(io.StringIO(_read_normalized(path)), delimiter="\t", quoting=csv.QUOTE_MINIMAL)
+    skipped = False
+    for raw in reader:
+        if has_header and not skipped:
+            skipped = True
+            continue
+        row = _coerce_to_six_columns(raw, verbatim_idx, fixed_tail_len)
+        if row is None or len(row) <= date_col:
+            continue
+        if row[date_col].strip():
+            samples.append(row[date_col])
         if len(samples) >= _DATE_SAMPLE_SIZE:
             break
     return _detect_date_format(samples)
 
 
-def _coerce_to_six_columns(row: list[str]) -> list[str] | None:
+def _coerce_to_six_columns(
+    row: list[str], verbatim_idx: int = 4, fixed_tail_len: int = 1
+) -> list[str] | None:
     """Devuelve una fila de exactamente 6 columnas o ``None`` si imposible.
 
-    Si la fila trae más de 6 columnas, une las posiciones ``4..-2`` con TAB
-    como verbatim y preserva ``-1`` como branch_id. Si trae menos de 6,
-    devuelve ``None``.
+    Si la fila trae más de 6 columnas, une las posiciones desde
+    ``verbatim_idx`` hasta ``-fixed_tail_len`` (exclusivo) con TAB como
+    verbatim y preserva los últimos ``fixed_tail_len`` campos. ``verbatim_idx``
+    es 4 / ``fixed_tail_len`` 1 para el orden "record_id-first" (fixture);
+    ``verbatim_idx`` 3 / ``fixed_tail_len`` 2 para el orden "date-first" de
+    los corpora reales (record_id y branch_id al final).
     """
     if len(row) < 6:
         return None
     if len(row) == 6:
         return row
-    head = row[:4]
-    branch_id = row[-1]
-    verbatim = "\t".join(row[4:-1])
-    return [*head, verbatim, branch_id]
+    head = row[:verbatim_idx]
+    tail = row[-fixed_tail_len:]
+    verbatim = "\t".join(row[verbatim_idx : -fixed_tail_len])
+    return [*head, verbatim, *tail]
 
 
 def _parse_date(date_str: str, fmt: str) -> str | None:
@@ -142,17 +227,33 @@ def _clean_verbatim(s: str) -> str:
     return _WS_RE.sub(" ", s)
 
 
-def _normalize_row(raw: list[str], row_num: int, date_fmt: str) -> ParsedRow:
-    coerced = _coerce_to_six_columns(raw)
+def _normalize_row(
+    raw: list[str],
+    row_num: int,
+    date_fmt: str,
+    verbatim_idx: int = 4,
+    fixed_tail_len: int = 1,
+) -> ParsedRow:
+    coerced = _coerce_to_six_columns(raw, verbatim_idx, fixed_tail_len)
     if coerced is None:
         return ParsedRow(row_num=row_num, is_valid=False, error="menos de 6 columnas")
 
-    record_id = coerced[0].strip()
-    date_str = coerced[1].strip()
-    nps_group = coerced[2].strip()
-    nps_rate_str = coerced[3].strip()
-    verbatim_raw = coerced[4] if coerced[4] is not None else ""
-    branch_id = coerced[5].strip()
+    if verbatim_idx == 3:
+        # Orden date-first (corpora reales): date, group, rate, verbatim, record_id, branch_id
+        date_str = coerced[0].strip()
+        nps_group = coerced[1].strip()
+        nps_rate_str = coerced[2].strip()
+        verbatim_raw = coerced[3] if coerced[3] is not None else ""
+        record_id = coerced[4].strip()
+        branch_id = coerced[5].strip()
+    else:
+        # Orden record-first (fixture sintética): record_id, date, group, rate, verbatim, branch_id
+        record_id = coerced[0].strip()
+        date_str = coerced[1].strip()
+        nps_group = coerced[2].strip()
+        nps_rate_str = coerced[3].strip()
+        verbatim_raw = coerced[4] if coerced[4] is not None else ""
+        branch_id = coerced[5].strip()
 
     if not record_id:
         return ParsedRow(row_num=row_num, is_valid=False, error="record_id vacío")
@@ -202,14 +303,19 @@ def _normalize_row(raw: list[str], row_num: int, date_fmt: str) -> ParsedRow:
 def parse_tsv(path: Path) -> Iterator[ParsedRow]:
     """Itera filas del TSV (válidas e inválidas) en orden de archivo.
 
-    Resuelve el formato de fecha con un sample de 100 filas antes de iniciar
-    la iteración principal.
+    Pre-scan: detecta orden de columnas (date-first vs record-first),
+    presencia de header y formato de fecha. Skipea el header si lo detecta.
     """
     path = Path(path)
-    date_fmt = _detect_date_format_from_file(path)
+    verbatim_idx, fixed_tail_len, has_header = _scan_corpus(path)
+    date_fmt = _detect_date_format_from_file(path, verbatim_idx, fixed_tail_len, has_header)
     reader = csv.reader(io.StringIO(_read_normalized(path)), delimiter="\t", quoting=csv.QUOTE_MINIMAL)
+    skipped_header = False
     for row_num, raw in enumerate(reader, start=1):
-        yield _normalize_row(raw, row_num, date_fmt)
+        if has_header and not skipped_header:
+            skipped_header = True
+            continue
+        yield _normalize_row(raw, row_num, date_fmt, verbatim_idx, fixed_tail_len)
 
 
 __all__ = ["ParsedRow", "VALID_NPS_GROUPS", "parse_tsv"]

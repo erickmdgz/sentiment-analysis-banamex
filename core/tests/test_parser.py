@@ -133,3 +133,52 @@ def test_parser_verbatim_vacio_da_has_verbatim_false(tmp_path: Path) -> None:
     assert rows[0].row is not None
     assert rows[0].row.verbatim is None
     assert rows[0].verbatim_clean is None
+
+
+# --- Auto-detect de orden de columnas + skip de header (ajuste M6) ---
+
+
+def test_parser_orden_date_first_con_header_y_record_id_al_final(tmp_path: Path) -> None:
+    """Corpora reales de Banamex: header + filas date-first (date, group, rate, verbatim, record_id, branch_id)."""
+    header = b"fecha\tnps_group\tnps_rate\tverbatim\trecord_id\tbranch_id\n"
+    r1 = b"01/03/2026\tPromotor\t10\tExcelente servicio\tREC-100\tA-201\n"
+    r2 = b"15/03/2026\tDetractor\t2\tCajero descompuesto\tREC-101\tA-202\n"
+    p = _write(tmp_path / "real.tsv", [header, r1, r2])
+    rows = list(parse_tsv(p))
+    assert len(rows) == 2
+    assert all(r.is_valid for r in rows)
+    assert rows[0].row is not None and rows[1].row is not None
+    assert rows[0].row.record_id == "REC-100"
+    assert rows[0].row.branch_id == "A-201"
+    assert rows[0].row.verbatim == "Excelente servicio"
+    assert rows[1].row.record_id == "REC-101"
+    assert rows[1].row.branch_id == "A-202"
+    assert rows[1].row.response_date == "2026-03-15"
+
+
+def test_parser_date_first_tolera_tabs_accidentales_en_verbatim(tmp_path: Path) -> None:
+    """En orden date-first, verbatim multi-tab se une preservando record_id y branch_id finales."""
+    header = b"fecha\tnps_group\tnps_rate\tverbatim\trecord_id\tbranch_id\n"
+    # 8 columnas físicas: date, group, rate, v1, v2, v3, record_id, branch_id
+    line = b"01/03/2026\tPasivo\t7\tparte1\tparte2\tparte3\tREC-200\tA-303\n"
+    p = _write(tmp_path / "real_tabs.tsv", [header, line])
+    rows = list(parse_tsv(p))
+    assert len(rows) == 1
+    assert rows[0].is_valid is True
+    assert rows[0].row is not None
+    assert rows[0].row.record_id == "REC-200"
+    assert rows[0].row.branch_id == "A-303"
+    assert rows[0].row.verbatim is not None
+    for token in ("parte1", "parte2", "parte3"):
+        assert token in rows[0].row.verbatim
+
+
+def test_parser_header_se_skipea_sin_contar_como_invalida(tmp_path: Path) -> None:
+    """El header detectado (tokens reconocidos) no aparece en el yield ni se cuenta como inválida."""
+    header = b"fecha\tnps_group\tnps_rate\tverbatim\trecord_id\tbranch_id\n"
+    r1 = b"01/03/2026\tPromotor\t10\ttexto\tREC-1\tA-1\n"
+    p = _write(tmp_path / "h.tsv", [header, r1])
+    rows = list(parse_tsv(p))
+    assert len(rows) == 1
+    assert sum(1 for r in rows if not r.is_valid) == 0
+    assert rows[0].is_valid is True

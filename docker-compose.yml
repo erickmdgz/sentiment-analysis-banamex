@@ -1,0 +1,45 @@
+# Stack desplegable del MVP sentiment-analysis-banamex.
+# `docker compose up` levanta API + Web. La DB SQLite se monta desde `./data/processed`.
+#
+# Nota: el build context de `api` es la raíz del repo, no `./api/`, porque
+# `api/Dockerfile` hace `COPY core/ engine/ analytics/ api/` (ver
+# `docs/plan_implementacion/contracts_issues.md` entrada 2026-05-21 sobre M4).
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: banamex-api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-demo-secret-change-in-prod}
+      - JWT_EXPIRATION_HOURS=${JWT_EXPIRATION_HOURS:-24}
+      - DATABASE_URL=sqlite:////app/data/processed/banamex.db
+      - CORE_DB_PATH=/app/data/processed/banamex.db
+      - CLASSIFIER_MODEL_PATH=/app/data/models/classifier.joblib
+    volumes:
+      - ./data:/app/data:delegated
+      - ./api/openapi.json:/app/api/openapi.json:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz').status==200 else 1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 20s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    container_name: banamex-web
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
