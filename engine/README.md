@@ -3,8 +3,8 @@
 Paquete Python del motor híbrido de clasificación para `sentiment-analysis-banamex`.
 
 Este README documenta lo entregado en **M2a** (anotador LLM local + 4 extractores
-rule-based). M2b (clasificador supervisado) vive en otro worktree y se integra
-después por merge en `main`.
+rule-based) y **M2b** (clasificador supervisado L1+L2 y pipeline público
+consumido por `analytics/`, `api/` y los scripts de preprocess).
 
 ## Instalación
 
@@ -54,10 +54,13 @@ from engine.annotator import run_annotation, sample_records, AnnotationCache
 | `sample_records(df, target_size, seed)` | Muestreo estratificado 35/25/40 |
 | `run_annotation(df, ...)` | Corre el anotador end-to-end (async) |
 | `AnnotationCache` | Caché en disco por `record_id` |
-
-Cuando M2b esté listo, también expondrá `engine.pipeline.classify` y
-`engine.classifier`. Hasta entonces, los módulos `embeddings.py`, `trainer.py`,
-`classifier.py`, `pipeline.py` y `mocks.py` no existen (los provee M2b).
+| `engine.embeddings.Embedder` / `get_default_embedder()` | Singleton de `sentence-transformers` (decisión §9) |
+| `engine.trainer.train(annotation_run_id, seed)` | Entrena el clasificador OneVsRest LogReg sobre el golden set y persiste `data/models/classifier.joblib` + fila `classifier_runs` |
+| `engine.classifier.Classifier` / `get_default_classifier()` | Carga el `.joblib` y expone `predict(texts)` (umbral 0.5) |
+| `engine.pipeline.classify(record_id, text, nps_group)` | API pública: polaridad heredada + clasificación + fallback §11 + metadata |
+| `engine.pipeline.classify_batch(items)` | Versión batch (encode + predict en una sola pasada) |
+| `engine.pipeline.persist_classification(result)` | Inserta en `classifications` (multilabel) y upsert en `metadata_extractions` |
+| `engine.mocks.classify_mock` | Mock determinístico sin modelo entrenado (consumido por M3 y M4) |
 
 ## CLI
 
@@ -85,12 +88,50 @@ Flags útiles de `annotate-sample`:
 - `--skip-preflight` evita el chequeo de Ollama (útil para pipelines de prueba).
 - `--fixture <csv>` apunta a un CSV en lugar de la DB.
 
+### Subcomandos M2b
+
+```bash
+# Entrenar el clasificador sobre el golden set de una corrida de anotación
+python -m engine.cli train --annotation-run-id 1
+
+# Clasificar todas las verbalizations sin fila previa (batches de 1000)
+python -m engine.cli predict-all --batch-size 1000 --report-every 10000
+
+# Clasificar un texto suelto (debug)
+python -m engine.cli predict-one \
+    --text "el cajero fue amable" \
+    --nps-group Promotor
+```
+
+`train` produce `data/models/classifier.joblib` (umbral fijo 0.5, decisión §11)
+e inserta una fila en `classifier_runs` con métricas `f1_micro`, `f1_macro`,
+`hamming_loss`. `predict-all` consume el modelo via singleton
+`get_default_classifier` y persiste cada batch en una sola transacción.
+
+## Ejemplo de uso programático
+
+```python
+from engine.pipeline import classify_batch, persist_classification
+
+items = [("R001", "el cajero fue muy amable", "Promotor"),
+         ("R002", "esperé dos horas", "Detractor")]
+for result in classify_batch(items):
+    print(result["record_id"], result["categories"][0]["l2_code"])
+    persist_classification(result)
+```
+
+`engine.mocks.classify_mock` ofrece la misma firma sin necesidad de entrenar
+el clasificador — útil para que M3/M4 escriban tests reproducibles.
+
 ## Tests
 
 ```bash
-pytest engine/tests/test_taxonomy.py \
-       engine/tests/test_annotator.py \
-       engine/tests/test_extractors.py
+pytest engine/tests/                       # suite completa (M2a + M2b)
+pytest engine/tests/test_embeddings.py \
+       engine/tests/test_trainer.py \
+       engine/tests/test_classifier.py \
+       engine/tests/test_pipeline.py \
+       engine/tests/test_mocks.py          # sólo M2b
 ```
 
 Los tests del anotador usan un cliente Ollama mock, no requieren Ollama real ni
