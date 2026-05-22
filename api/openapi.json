@@ -1,0 +1,2682 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Banamex CX MVP",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "description": "Devuelve un JWT firmado HS256. Cualquier `{username, password}` es válido (`00 §18`).",
+        "operationId": "login_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Me",
+        "description": "Devuelve el `username` decodificado del JWT. 401 si el token es inválido.",
+        "operationId": "me_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Upload",
+        "description": "Sube un `.txt` y lo procesa (parse → dedup → clasifica).\n\nDevuelve `{file_id, validation_summary, already_processed}` (`01 §8`).",
+        "operationId": "upload_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/{file_id}/status": {
+      "get": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Upload Status",
+        "description": "Devuelve el estado de procesamiento. En el flujo síncrono actual: `done`.",
+        "operationId": "upload_status_upload__file_id__status_get",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "File Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/validation": {
+      "get": {
+        "tags": [
+          "validation"
+        ],
+        "summary": "Validation",
+        "description": "Agrega `ValidationSummary` sobre la totalidad de archivos en `files`.",
+        "operationId": "validation_validation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/validation/coverage": {
+      "get": {
+        "tags": [
+          "validation"
+        ],
+        "summary": "Coverage",
+        "description": "Cobertura de objetivos: detectadas vs con target, sin responses, etc.",
+        "operationId": "coverage_validation_coverage_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/ytd": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Ytd",
+        "description": "Compone `NationalYTD` combinando todas las agregaciones nacionales (`01 §4`).",
+        "operationId": "national_ytd_national_ytd_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NationalYTD"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/trend": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Trend",
+        "operationId": "national_trend_national_trend_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonthlyTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/compare": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Compare",
+        "operationId": "national_compare_national_compare_get",
+        "parameters": [
+          {
+            "name": "month_a",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "YYYY-MM",
+              "title": "Month A"
+            },
+            "description": "YYYY-MM"
+          },
+          {
+            "name": "month_b",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "YYYY-MM",
+              "title": "Month B"
+            },
+            "description": "YYYY-MM"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonthlyComparison"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/critical-branches": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Critical Branches",
+        "operationId": "national_critical_branches_national_critical_branches_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CriticalBranch"
+                  },
+                  "title": "Response National Critical Branches National Critical Branches Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/rankings": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Rankings",
+        "operationId": "national_rankings_national_rankings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rankings"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/causes": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Causes",
+        "operationId": "national_causes_national_causes_get",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Promotor",
+                "Pasivo",
+                "Detractor"
+              ],
+              "type": "string",
+              "default": "Detractor",
+              "title": "Group"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CauseBucket"
+                  },
+                  "title": "Response National Causes National Causes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/strengths": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Strengths",
+        "operationId": "national_strengths_national_strengths_get",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Promotor",
+                "Pasivo",
+                "Detractor"
+              ],
+              "type": "string",
+              "default": "Promotor",
+              "title": "Group"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StrengthBucket"
+                  },
+                  "title": "Response National Strengths National Strengths Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/actions": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Actions",
+        "operationId": "national_actions_national_actions_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SuggestedAction"
+                  },
+                  "title": "Response National Actions National Actions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/impact": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Impact",
+        "operationId": "national_impact_national_impact_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ImpactByCategory"
+                  },
+                  "type": "array",
+                  "title": "Response National Impact National Impact Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/insights": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Insights Endpoint",
+        "operationId": "national_insights_endpoint_national_insights_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Insight"
+                  },
+                  "type": "array",
+                  "title": "Response National Insights Endpoint National Insights Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/national/passive-analysis": {
+      "get": {
+        "tags": [
+          "national"
+        ],
+        "summary": "National Passive Analysis",
+        "operationId": "national_passive_analysis_national_passive_analysis_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassiveAnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Search Branches",
+        "description": "Lista las sucursales que matchean `q` con `LIKE %q%`.",
+        "operationId": "search_branches_branches_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Substring de branch_id",
+              "title": "Q"
+            },
+            "description": "Substring de branch_id"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BranchSearchResult"
+                  },
+                  "title": "Response Search Branches Branches Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/ytd": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Ytd",
+        "operationId": "branch_ytd_branches__branch_id__ytd_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchYTD"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/trend": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Trend",
+        "operationId": "branch_trend_branches__branch_id__trend_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonthlyTrend"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/compare": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Compare",
+        "operationId": "branch_compare_branches__branch_id__compare_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "month_a",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "YYYY-MM",
+              "title": "Month A"
+            },
+            "description": "YYYY-MM"
+          },
+          {
+            "name": "month_b",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "YYYY-MM",
+              "title": "Month B"
+            },
+            "description": "YYYY-MM"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonthlyComparison"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/causes": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Causes",
+        "operationId": "branch_causes_branches__branch_id__causes_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Promotor",
+                "Pasivo",
+                "Detractor"
+              ],
+              "type": "string",
+              "default": "Detractor",
+              "title": "Group"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CauseBucket"
+                  },
+                  "title": "Response Branch Causes Branches  Branch Id  Causes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/strengths": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Strengths",
+        "operationId": "branch_strengths_branches__branch_id__strengths_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StrengthBucket"
+                  },
+                  "title": "Response Branch Strengths Branches  Branch Id  Strengths Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/words": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Words",
+        "operationId": "branch_words_branches__branch_id__words_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Promotor",
+                    "Pasivo",
+                    "Detractor"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Group"
+            }
+          },
+          {
+            "name": "top_n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 30,
+              "title": "Top N"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WordFrequency"
+                  },
+                  "title": "Response Branch Words Branches  Branch Id  Words Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/representatives": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Representatives",
+        "operationId": "branch_representatives_branches__branch_id__representatives_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "n_per_topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 1,
+              "default": 2,
+              "title": "N Per Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RepresentativeComment"
+                  },
+                  "title": "Response Branch Representatives Branches  Branch Id  Representatives Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/personnel": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Personnel",
+        "operationId": "branch_personnel_branches__branch_id__personnel_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonnelMention"
+                  },
+                  "title": "Response Branch Personnel Branches  Branch Id  Personnel Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/actions": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Actions",
+        "operationId": "branch_actions_branches__branch_id__actions_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SuggestedAction"
+                  },
+                  "title": "Response Branch Actions Branches  Branch Id  Actions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branches/{branch_id}/insights": {
+      "get": {
+        "tags": [
+          "branches"
+        ],
+        "summary": "Branch Insights Endpoint",
+        "operationId": "branch_insights_endpoint_branches__branch_id__insights_get",
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Insight"
+                  },
+                  "title": "Response Branch Insights Endpoint Branches  Branch Id  Insights Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/files": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Files",
+        "operationId": "list_files_admin_files_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FileRecord"
+                  },
+                  "type": "array",
+                  "title": "Response List Files Admin Files Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/runs": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Runs",
+        "operationId": "list_runs_admin_runs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthz",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnnotationRunRecord": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "sample_size": {
+            "type": "integer",
+            "title": "Sample Size"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "started_at": {
+            "type": "string",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "runtime_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Runtime Seconds"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sample_size",
+          "model",
+          "started_at",
+          "finished_at",
+          "runtime_seconds",
+          "status"
+        ],
+        "title": "AnnotationRunRecord"
+      },
+      "Body_upload_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_upload_post"
+      },
+      "BranchSearchResult": {
+        "properties": {
+          "branch_id": {
+            "type": "string",
+            "title": "Branch Id"
+          },
+          "response_count": {
+            "type": "integer",
+            "title": "Response Count"
+          },
+          "has_target": {
+            "type": "boolean",
+            "title": "Has Target"
+          }
+        },
+        "type": "object",
+        "required": [
+          "branch_id",
+          "response_count",
+          "has_target"
+        ],
+        "title": "BranchSearchResult"
+      },
+      "BranchYTD": {
+        "properties": {
+          "branch_id": {
+            "type": "string",
+            "title": "Branch Id"
+          },
+          "nps": {
+            "$ref": "#/components/schemas/NPSSummary"
+          },
+          "trend": {
+            "$ref": "#/components/schemas/MonthlyTrend"
+          },
+          "causes": {
+            "items": {
+              "$ref": "#/components/schemas/CauseBucket"
+            },
+            "type": "array",
+            "title": "Causes"
+          },
+          "strengths": {
+            "items": {
+              "$ref": "#/components/schemas/StrengthBucket"
+            },
+            "type": "array",
+            "title": "Strengths"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedAction"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "insights": {
+            "items": {
+              "$ref": "#/components/schemas/Insight"
+            },
+            "type": "array",
+            "title": "Insights"
+          },
+          "top_words": {
+            "items": {
+              "$ref": "#/components/schemas/WordFrequency"
+            },
+            "type": "array",
+            "title": "Top Words"
+          },
+          "representatives": {
+            "items": {
+              "$ref": "#/components/schemas/RepresentativeComment"
+            },
+            "type": "array",
+            "title": "Representatives"
+          },
+          "personnel": {
+            "items": {
+              "$ref": "#/components/schemas/PersonnelMention"
+            },
+            "type": "array",
+            "title": "Personnel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "branch_id",
+          "nps",
+          "trend",
+          "causes",
+          "strengths",
+          "actions",
+          "insights",
+          "top_words",
+          "representatives",
+          "personnel"
+        ],
+        "title": "BranchYTD"
+      },
+      "CauseBucket": {
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "pct_of_group": {
+            "type": "number",
+            "title": "Pct Of Group"
+          },
+          "sample_l2": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sample L2"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bucket",
+          "count",
+          "pct_of_group",
+          "sample_l2"
+        ],
+        "title": "CauseBucket"
+      },
+      "ClassifierRunRecord": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "model_path": {
+            "type": "string",
+            "title": "Model Path"
+          },
+          "trained_on_run_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trained On Run Id"
+          },
+          "trained_at": {
+            "type": "string",
+            "title": "Trained At"
+          },
+          "n_samples": {
+            "type": "integer",
+            "title": "N Samples"
+          },
+          "n_labels": {
+            "type": "integer",
+            "title": "N Labels"
+          },
+          "f1_micro": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "F1 Micro"
+          },
+          "f1_macro": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "F1 Macro"
+          },
+          "hamming_loss": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hamming Loss"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "model_path",
+          "trained_on_run_id",
+          "trained_at",
+          "n_samples",
+          "n_labels",
+          "f1_micro",
+          "f1_macro",
+          "hamming_loss"
+        ],
+        "title": "ClassifierRunRecord"
+      },
+      "CoverageSummary": {
+        "properties": {
+          "branches_detected": {
+            "type": "integer",
+            "title": "Branches Detected"
+          },
+          "branches_with_target": {
+            "type": "integer",
+            "title": "Branches With Target"
+          },
+          "branches_without_target": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Branches Without Target"
+          },
+          "branches_with_target_no_responses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Branches With Target No Responses"
+          },
+          "invalid_targets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Invalid Targets"
+          },
+          "duplicate_targets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Duplicate Targets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "branches_detected",
+          "branches_with_target",
+          "branches_without_target",
+          "branches_with_target_no_responses",
+          "invalid_targets",
+          "duplicate_targets"
+        ],
+        "title": "CoverageSummary"
+      },
+      "CriticalBranch": {
+        "properties": {
+          "branch_id": {
+            "type": "string",
+            "title": "Branch Id"
+          },
+          "nps_actual": {
+            "type": "number",
+            "title": "Nps Actual"
+          },
+          "nps_target": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nps Target"
+          },
+          "gap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap"
+          },
+          "detractors_pct": {
+            "type": "number",
+            "title": "Detractors Pct"
+          },
+          "triggered_conditions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Triggered Conditions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "branch_id",
+          "nps_actual",
+          "nps_target",
+          "gap",
+          "detractors_pct",
+          "triggered_conditions"
+        ],
+        "title": "CriticalBranch"
+      },
+      "FileRecord": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "rows_inserted": {
+            "type": "integer",
+            "title": "Rows Inserted"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "title": "Uploaded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "sha256",
+          "rows_inserted",
+          "uploaded_at"
+        ],
+        "title": "FileRecord"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "db_path": {
+            "type": "string",
+            "title": "Db Path"
+          },
+          "classifier_loaded": {
+            "type": "boolean",
+            "title": "Classifier Loaded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "db_path",
+          "classifier_loaded"
+        ],
+        "title": "HealthResponse"
+      },
+      "ImpactByCategory": {
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "impact_points": {
+            "type": "number",
+            "title": "Impact Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bucket",
+          "impact_points"
+        ],
+        "title": "ImpactByCategory"
+      },
+      "Insight": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "nps",
+              "brecha",
+              "fortaleza",
+              "fricción",
+              "personal",
+              "comparación",
+              "cobertura"
+            ],
+            "title": "Category"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "category"
+        ],
+        "title": "Insight"
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "MonthlyComparison": {
+        "properties": {
+          "month_a": {
+            "type": "string",
+            "title": "Month A"
+          },
+          "month_b": {
+            "type": "string",
+            "title": "Month B"
+          },
+          "nps_a": {
+            "type": "number",
+            "title": "Nps A"
+          },
+          "nps_b": {
+            "type": "number",
+            "title": "Nps B"
+          },
+          "nps_change": {
+            "type": "number",
+            "title": "Nps Change"
+          },
+          "distribution_a": {
+            "$ref": "#/components/schemas/NPSDistribution"
+          },
+          "distribution_b": {
+            "$ref": "#/components/schemas/NPSDistribution"
+          },
+          "causes_a": {
+            "items": {
+              "$ref": "#/components/schemas/CauseBucket"
+            },
+            "type": "array",
+            "title": "Causes A"
+          },
+          "causes_b": {
+            "items": {
+              "$ref": "#/components/schemas/CauseBucket"
+            },
+            "type": "array",
+            "title": "Causes B"
+          },
+          "causes_increased": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Causes Increased"
+          },
+          "causes_decreased": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Causes Decreased"
+          },
+          "strengths_a": {
+            "items": {
+              "$ref": "#/components/schemas/StrengthBucket"
+            },
+            "type": "array",
+            "title": "Strengths A"
+          },
+          "strengths_b": {
+            "items": {
+              "$ref": "#/components/schemas/StrengthBucket"
+            },
+            "type": "array",
+            "title": "Strengths B"
+          },
+          "strengths_increased": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths Increased"
+          },
+          "strengths_decreased": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths Decreased"
+          },
+          "branches_improved": {
+            "items": {
+              "$ref": "#/components/schemas/CriticalBranch"
+            },
+            "type": "array",
+            "title": "Branches Improved"
+          },
+          "branches_worsened": {
+            "items": {
+              "$ref": "#/components/schemas/CriticalBranch"
+            },
+            "type": "array",
+            "title": "Branches Worsened"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedAction"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month_a",
+          "month_b",
+          "nps_a",
+          "nps_b",
+          "nps_change",
+          "distribution_a",
+          "distribution_b",
+          "causes_a",
+          "causes_b",
+          "causes_increased",
+          "causes_decreased",
+          "strengths_a",
+          "strengths_b",
+          "strengths_increased",
+          "strengths_decreased",
+          "branches_improved",
+          "branches_worsened",
+          "actions"
+        ],
+        "title": "MonthlyComparison"
+      },
+      "MonthlyPoint": {
+        "properties": {
+          "month": {
+            "type": "string",
+            "title": "Month"
+          },
+          "nps": {
+            "type": "number",
+            "title": "Nps"
+          },
+          "responses": {
+            "type": "integer",
+            "title": "Responses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "nps",
+          "responses"
+        ],
+        "title": "MonthlyPoint"
+      },
+      "MonthlyTrend": {
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/MonthlyPoint"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "points"
+        ],
+        "title": "MonthlyTrend"
+      },
+      "NPSDistribution": {
+        "properties": {
+          "promoters_pct": {
+            "type": "number",
+            "title": "Promoters Pct"
+          },
+          "passives_pct": {
+            "type": "number",
+            "title": "Passives Pct"
+          },
+          "detractors_pct": {
+            "type": "number",
+            "title": "Detractors Pct"
+          },
+          "promoters_count": {
+            "type": "integer",
+            "title": "Promoters Count"
+          },
+          "passives_count": {
+            "type": "integer",
+            "title": "Passives Count"
+          },
+          "detractors_count": {
+            "type": "integer",
+            "title": "Detractors Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "promoters_pct",
+          "passives_pct",
+          "detractors_pct",
+          "promoters_count",
+          "passives_count",
+          "detractors_count"
+        ],
+        "title": "NPSDistribution"
+      },
+      "NPSSummary": {
+        "properties": {
+          "nps_actual": {
+            "type": "number",
+            "title": "Nps Actual"
+          },
+          "nps_target": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nps Target"
+          },
+          "gap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap"
+          },
+          "total_responses": {
+            "type": "integer",
+            "title": "Total Responses"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/NPSDistribution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nps_actual",
+          "nps_target",
+          "gap",
+          "total_responses",
+          "distribution"
+        ],
+        "title": "NPSSummary"
+      },
+      "NationalYTD": {
+        "properties": {
+          "nps": {
+            "$ref": "#/components/schemas/NPSSummary"
+          },
+          "trend": {
+            "$ref": "#/components/schemas/MonthlyTrend"
+          },
+          "causes": {
+            "items": {
+              "$ref": "#/components/schemas/CauseBucket"
+            },
+            "type": "array",
+            "title": "Causes"
+          },
+          "strengths": {
+            "items": {
+              "$ref": "#/components/schemas/StrengthBucket"
+            },
+            "type": "array",
+            "title": "Strengths"
+          },
+          "critical_branches": {
+            "items": {
+              "$ref": "#/components/schemas/CriticalBranch"
+            },
+            "type": "array",
+            "title": "Critical Branches"
+          },
+          "rankings": {
+            "$ref": "#/components/schemas/Rankings"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedAction"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "impact": {
+            "items": {
+              "$ref": "#/components/schemas/ImpactByCategory"
+            },
+            "type": "array",
+            "title": "Impact"
+          },
+          "insights": {
+            "items": {
+              "$ref": "#/components/schemas/Insight"
+            },
+            "type": "array",
+            "title": "Insights"
+          },
+          "branches_total": {
+            "type": "integer",
+            "title": "Branches Total"
+          },
+          "branches_with_target": {
+            "type": "integer",
+            "title": "Branches With Target"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nps",
+          "trend",
+          "causes",
+          "strengths",
+          "critical_branches",
+          "rankings",
+          "actions",
+          "impact",
+          "insights",
+          "branches_total",
+          "branches_with_target"
+        ],
+        "title": "NationalYTD"
+      },
+      "PassiveAnalysisResponse": {
+        "properties": {
+          "near_promoter": {
+            "items": {},
+            "type": "array",
+            "title": "Near Promoter"
+          },
+          "near_detractor": {
+            "items": {},
+            "type": "array",
+            "title": "Near Detractor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "near_promoter",
+          "near_detractor"
+        ],
+        "title": "PassiveAnalysisResponse"
+      },
+      "PersonnelMention": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "polarity": {
+            "type": "string",
+            "enum": [
+              "pos",
+              "neg"
+            ],
+            "title": "Polarity"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "example_record_id": {
+            "type": "string",
+            "title": "Example Record Id"
+          },
+          "example_verbatim": {
+            "type": "string",
+            "title": "Example Verbatim"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "polarity",
+          "count",
+          "example_record_id",
+          "example_verbatim"
+        ],
+        "title": "PersonnelMention"
+      },
+      "Ranking": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "items"
+        ],
+        "title": "Ranking"
+      },
+      "Rankings": {
+        "properties": {
+          "worst_nps": {
+            "$ref": "#/components/schemas/Ranking"
+          },
+          "worst_gap": {
+            "$ref": "#/components/schemas/Ranking"
+          },
+          "most_detractors": {
+            "$ref": "#/components/schemas/Ranking"
+          },
+          "worsened": {
+            "$ref": "#/components/schemas/Ranking"
+          },
+          "improved": {
+            "$ref": "#/components/schemas/Ranking"
+          }
+        },
+        "type": "object",
+        "required": [
+          "worst_nps",
+          "worst_gap",
+          "most_detractors",
+          "worsened",
+          "improved"
+        ],
+        "title": "Rankings"
+      },
+      "RepresentativeComment": {
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "verbatim": {
+            "type": "string",
+            "title": "Verbatim"
+          },
+          "nps_rate": {
+            "type": "integer",
+            "title": "Nps Rate"
+          },
+          "nps_group": {
+            "type": "string",
+            "enum": [
+              "Promotor",
+              "Pasivo",
+              "Detractor"
+            ],
+            "title": "Nps Group"
+          },
+          "response_date": {
+            "type": "string",
+            "title": "Response Date"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          }
+        },
+        "type": "object",
+        "required": [
+          "record_id",
+          "verbatim",
+          "nps_rate",
+          "nps_group",
+          "response_date",
+          "bucket"
+        ],
+        "title": "RepresentativeComment"
+      },
+      "RunsResponse": {
+        "properties": {
+          "annotation_runs": {
+            "items": {
+              "$ref": "#/components/schemas/AnnotationRunRecord"
+            },
+            "type": "array",
+            "title": "Annotation Runs"
+          },
+          "classifier_runs": {
+            "items": {
+              "$ref": "#/components/schemas/ClassifierRunRecord"
+            },
+            "type": "array",
+            "title": "Classifier Runs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "annotation_runs",
+          "classifier_runs"
+        ],
+        "title": "RunsResponse"
+      },
+      "StrengthBucket": {
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "pct_of_group": {
+            "type": "number",
+            "title": "Pct Of Group"
+          },
+          "sample_l2": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sample L2"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bucket",
+          "count",
+          "pct_of_group",
+          "sample_l2"
+        ],
+        "title": "StrengthBucket"
+      },
+      "SuggestedAction": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "alta",
+              "media",
+              "baja"
+            ],
+            "title": "Priority"
+          },
+          "related_bucket": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Bucket"
+          },
+          "related_branches": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Related Branches",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "priority",
+          "related_bucket"
+        ],
+        "title": "SuggestedAction"
+      },
+      "TokenResponse": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "expires_at"
+        ],
+        "title": "TokenResponse"
+      },
+      "UploadResponse": {
+        "properties": {
+          "file_id": {
+            "type": "integer",
+            "title": "File Id"
+          },
+          "validation_summary": {
+            "$ref": "#/components/schemas/ValidationSummary"
+          },
+          "already_processed": {
+            "type": "boolean",
+            "title": "Already Processed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_id",
+          "validation_summary",
+          "already_processed"
+        ],
+        "title": "UploadResponse"
+      },
+      "UploadStatusResponse": {
+        "properties": {
+          "file_id": {
+            "type": "integer",
+            "title": "File Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "parsing",
+              "classifying",
+              "done",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "progress": {
+            "type": "number",
+            "title": "Progress"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_id",
+          "status",
+          "progress"
+        ],
+        "title": "UploadStatusResponse"
+      },
+      "UserInfo": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "title": "UserInfo"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "ValidationSummary": {
+        "properties": {
+          "files_processed": {
+            "type": "integer",
+            "title": "Files Processed"
+          },
+          "rows_loaded": {
+            "type": "integer",
+            "title": "Rows Loaded"
+          },
+          "rows_new": {
+            "type": "integer",
+            "title": "Rows New"
+          },
+          "rows_duplicated_ignored": {
+            "type": "integer",
+            "title": "Rows Duplicated Ignored"
+          },
+          "branches_detected": {
+            "type": "integer",
+            "title": "Branches Detected"
+          },
+          "period_available": {
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Period Available"
+          },
+          "months_available": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Months Available"
+          },
+          "columns_detected": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns Detected"
+          },
+          "rows_valid": {
+            "type": "integer",
+            "title": "Rows Valid"
+          },
+          "rows_empty_verbatim": {
+            "type": "integer",
+            "title": "Rows Empty Verbatim"
+          },
+          "rows_invalid_nps": {
+            "type": "integer",
+            "title": "Rows Invalid Nps"
+          },
+          "rows_missing_branch": {
+            "type": "integer",
+            "title": "Rows Missing Branch"
+          },
+          "rows_duplicate_record_id": {
+            "type": "integer",
+            "title": "Rows Duplicate Record Id"
+          },
+          "rows_invalid_date": {
+            "type": "integer",
+            "title": "Rows Invalid Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files_processed",
+          "rows_loaded",
+          "rows_new",
+          "rows_duplicated_ignored",
+          "branches_detected",
+          "period_available",
+          "months_available",
+          "columns_detected",
+          "rows_valid",
+          "rows_empty_verbatim",
+          "rows_invalid_nps",
+          "rows_missing_branch",
+          "rows_duplicate_record_id",
+          "rows_invalid_date"
+        ],
+        "title": "ValidationSummary"
+      },
+      "WordFrequency": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "title": "Word"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Promotor",
+                  "Pasivo",
+                  "Detractor"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "count"
+        ],
+        "title": "WordFrequency"
+      }
+    }
+  }
+}

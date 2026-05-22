@@ -145,3 +145,43 @@ Formato sugerido por entrada:
 **Resolución:** Adoptada la lectura §11 + §14.10 (fallback siempre, incluso si `is_classifiable=False`). §10.II queda **obsoleta** en este punto: el código y la cobertura mandan. `01_contratos_compartidos.md §4` no necesita cambios — los campos son independientes y compatibles con esta lectura. Esta entrada documenta la divergencia; futuros consumidores deben asumir que `is_classifiable=False` puede coexistir con una `categories` no vacía (donde la fila se distingue por `source='fallback'` y `confidence=0.0`).
 
 ---
+
+## 2026-05-21 — M4: contexto del `docker build` declarado en DoD vs. Dockerfile del contrato
+
+**Decisión/contrato afectado:** `06_M4_api.md` (sección Dockerfile + Definition of Done).
+
+**Lo que el contrato dice:**
+
+- DoD: `docker build -t banamex-api ./api` exitoso.
+- Dockerfile: `COPY core/ core/`, `COPY engine/ engine/`, `COPY analytics/ analytics/`, `COPY api/ api/`.
+
+**Conflicto:** Si el contexto del build es `./api`, los `COPY core/` y demás referencias a paquetes hermanos fallarán porque no son visibles desde el contexto. El Dockerfile tal como está descrito en `06` solo funciona con contexto = raíz del repo (`docker build -f api/Dockerfile .`).
+
+**Lo que la sesión M4 hizo:** Implementó el `api/Dockerfile` siguiendo la estructura del contrato (4 `COPY` + `pip install -e` sobre los 4 paquetes). Comentó en el Dockerfile que el build debe invocarse desde el repo root con `-f api/Dockerfile .`. El smoke build local se ejecuta como `docker build -t banamex-api -f api/Dockerfile .` desde la raíz. M6 (integración Docker, Etapa 3) ajustará el comando en `docker-compose.yml` y/o en los scripts de demo.
+
+**Estado:** Documentado. No bloquea ninguna sesión; M6 decide la forma final del comando.
+
+---
+
+## 2026-05-21 — M4: `engine.mocks` declarado en `01 §7` no existe en main al implementar M4 (RESUELTO)
+
+**Decisión/contrato afectado:** `01_contratos_compartidos.md §7` (API pública del motor) y `06_M4_api.md` (Contratos consumidos).
+
+**Lo que el contrato dice:**
+
+> Antes de que M2b esté listo, M3, M4 y M5 pueden importar de `engine.mocks`:
+>
+> ```python
+> # engine.mocks
+> def classify_mock(record_id: str, text: str, nps_group: str) -> ClassificationResult: ...
+> ```
+
+**Lo que la sesión M4 encuentra:** A la fecha de implementar M4 (Etapa 2, paralelo con M2b), `engine/src/engine/mocks.py` no existe en `main` (Etapa 1 cerró sin generarlo). M3, ya mergeado, no lo importa (no lo necesitaba: trabaja sobre tablas pobladas, no sobre `classify()`). Pero M4 sí lo necesita para el endpoint `/upload`, que tiene que poblar `classifications` y `metadata_extractions` después de cargar filas nuevas.
+
+**Lo que la sesión M4 hizo:** El alcance de esta sesión es estrictamente `api/` — no se toca `engine/`. Se introduce un mock **local** en `api/src/api/_classifier_shim.py` con la misma firma que el contrato declara para `engine.mocks.classify_mock` (y `classify_batch` análogo), determinístico, basado en el hash del `verbatim`. El módulo lleva un `TODO` y un docstring explicando que debe sustituirse por `engine.pipeline.classify_batch` cuando M2b se mergee. El router `/upload` consume **únicamente** este shim, así que sustituirlo es cambiar dos imports.
+
+**Razón:** Mantener aislamiento de la sesión M4 (no editar `engine/`). El mock local respeta el contrato de `ClassificationResult` y `Metadata` declarado en `01 §4`. La función `extract_all` real de `engine.extractors` (ya disponible en `main`) sí se usa para los metadatos transversales, así que esa parte del pipeline de upload no es mock.
+
+**Resolución:** Al mergear M2b a main (PR #7), el rebase de M4 sustituyó el import de `api._classifier_shim` por `engine.pipeline.classify_batch` (firma idéntica, parámetro opcional `classifier` keyword-only). El módulo `_classifier_shim.py` fue eliminado. La función `extract_all` ya se invocaba directamente de `engine.extractors`. Sustitución completada en el mismo rebase, sin cambios de schema ni de DTOs.
+
+---
