@@ -12,7 +12,7 @@ from core.models_db import BranchTarget, Verbalization
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
-from .nps import _ytd_filter_year, branch_ytd_summary
+from .nps import _nps_from_counts, _ytd_filter_year, branch_ytd_summary
 from .schemas import CriticalBranch, Ranking, Rankings
 
 CONDITION_LABELS = {
@@ -33,30 +33,45 @@ class _BranchSnapshot:
 
 
 def _branch_snapshots(session: Session) -> list[_BranchSnapshot]:
-    """Snapshot YTD por sucursal con responses > 0."""
+    """Snapshot YTD por sucursal con responses > 0.
+
+    Antes: 1 query por sucursal × 1298 sucursales = 2596+ queries y materializaba
+    ~473k ORM objects, tardaba 60-90s sobre el dataset real. Ahora: 2 queries
+    agregadas (counts por (branch_id, nps_group) + targets), agrupación en Python.
+    """
     year = _ytd_filter_year(session)
     if year is None:
         return []
-    branch_ids = session.execute(
-        select(Verbalization.branch_id)
+    grouped = session.execute(
+        select(Verbalization.branch_id, Verbalization.nps_group, func.count())
         .where(Verbalization.response_year == year)
-        .group_by(Verbalization.branch_id)
-    ).scalars().all()
+        .group_by(Verbalization.branch_id, Verbalization.nps_group)
+    ).all()
+    targets: dict[str, int] = dict(
+        session.execute(
+            select(BranchTarget.branch_id, BranchTarget.nps_target_annual)
+        ).all()
+    )
+    by_branch: dict[str, dict[str, int]] = {}
+    for bid, group, cnt in grouped:
+        by_branch.setdefault(str(bid), {})[str(group)] = int(cnt)
     snapshots: list[_BranchSnapshot] = []
-    for bid in branch_ids:
-        summary = branch_ytd_summary(session, bid)
-        if summary.total_responses == 0:
+    for bid, counts in by_branch.items():
+        actual, total, distribution = _nps_from_counts(counts)
+        if total == 0:
             continue
-        # nps_target en NPSSummary es float|None; en CriticalBranch es int|None
-        target_int: int | None
-        target_int = int(summary.nps_target) if summary.nps_target is not None else None
+        target_val = targets.get(bid)
+        target_int: int | None = int(target_val) if target_val is not None else None
+        gap: float | None = (
+            actual - float(target_val) if target_val is not None else None
+        )
         snapshots.append(
             _BranchSnapshot(
                 branch_id=bid,
-                nps_actual=summary.nps_actual,
+                nps_actual=actual,
                 nps_target=target_int,
-                gap=summary.gap,
-                detractors_pct=summary.distribution.detractors_pct,
+                gap=gap,
+                detractors_pct=distribution.detractors_pct,
             )
         )
     return snapshots
@@ -65,36 +80,40 @@ def _branch_snapshots(session: Session) -> list[_BranchSnapshot]:
 def _last_two_months_nps(
     session: Session, branch_id: str
 ) -> tuple[float, float] | None:
-    """Devuelve (nps_previo, nps_ultimo) sobre el año YTD si hay ≥ 2 meses."""
+    """Devuelve (nps_previo, nps_ultimo) sobre el año YTD si hay ≥ 2 meses.
+
+    Antes: 1 query para meses + 2 queries SELECT * que materializaban filas.
+    Ahora: 1 query agregada por (month, nps_group) y agrupación en Python.
+    """
     year = _ytd_filter_year(session)
     if year is None:
         return None
-    months_avail = session.execute(
-        select(Verbalization.response_month)
+    grouped = session.execute(
+        select(
+            Verbalization.response_month,
+            Verbalization.nps_group,
+            func.count(),
+        )
         .where(
             Verbalization.response_year == year,
             Verbalization.branch_id == branch_id,
         )
-        .group_by(Verbalization.response_month)
-        .order_by(Verbalization.response_month.desc())
-    ).scalars().all()
-    if len(months_avail) < 2:
+        .group_by(Verbalization.response_month, Verbalization.nps_group)
+    ).all()
+    by_month: dict[int, dict[str, int]] = {}
+    for month, group, cnt in grouped:
+        by_month.setdefault(int(month), {})[str(group)] = int(cnt)
+    months_desc = sorted(by_month.keys(), reverse=True)
+    if len(months_desc) < 2:
         return None
-    last, prev = int(months_avail[0]), int(months_avail[1])
+    last, prev = months_desc[0], months_desc[1]
 
     def _nps_for(month: int) -> float:
-        rows = session.execute(
-            select(Verbalization).where(
-                Verbalization.response_year == year,
-                Verbalization.branch_id == branch_id,
-                Verbalization.response_month == month,
-            )
-        ).scalars().all()
-        if not rows:
-            return 0.0
-        p = sum(1 for r in rows if r.nps_group == "Promotor")
-        d = sum(1 for r in rows if r.nps_group == "Detractor")
-        return (p - d) / len(rows) * 100.0
+        c = by_month.get(month, {})
+        p = int(c.get("Promotor", 0))
+        d = int(c.get("Detractor", 0))
+        total = p + int(c.get("Pasivo", 0)) + d
+        return (p - d) / total * 100.0 if total > 0 else 0.0
 
     return _nps_for(prev), _nps_for(last)
 
@@ -123,6 +142,44 @@ def critical_branches(session: Session, limit: int = 10) -> list[CriticalBranch]
     gaps_with_target = [s.gap for s in snapshots if s.gap is not None]
     worst_decile_gap = _percentile_threshold(gaps_with_target, 10.0)
 
+    # Pre-cargar todos los conteos mensuales en 1 query agregada (en vez de
+    # llamar _last_two_months_nps por sucursal — eran 1298 queries × snapshots).
+    year = _ytd_filter_year(session)
+    mom_data: dict[str, dict[int, dict[str, int]]] = {}
+    if year is not None:
+        for bid, month, group, cnt in session.execute(
+            select(
+                Verbalization.branch_id,
+                Verbalization.response_month,
+                Verbalization.nps_group,
+                func.count(),
+            )
+            .where(Verbalization.response_year == year)
+            .group_by(
+                Verbalization.branch_id,
+                Verbalization.response_month,
+                Verbalization.nps_group,
+            )
+        ).all():
+            mom_data.setdefault(str(bid), {}).setdefault(int(month), {})[
+                str(group)
+            ] = int(cnt)
+
+    def _mom_drop(branch_id: str) -> float | None:
+        by_month = mom_data.get(branch_id, {})
+        months_desc = sorted(by_month.keys(), reverse=True)
+        if len(months_desc) < 2:
+            return None
+
+        def _nps(m: int) -> float:
+            c = by_month[m]
+            p = int(c.get("Promotor", 0))
+            d = int(c.get("Detractor", 0))
+            total = p + int(c.get("Pasivo", 0)) + d
+            return (p - d) / total * 100.0 if total > 0 else 0.0
+
+        return _nps(months_desc[1]) - _nps(months_desc[0])
+
     items: list[CriticalBranch] = []
     for s in snapshots:
         conds: list[str] = []
@@ -140,11 +197,9 @@ def critical_branches(session: Session, limit: int = 10) -> list[CriticalBranch]
         if s.detractors_pct >= 30.0:
             conds.append(CONDITION_LABELS["detractors_high"])
         # (4) Deterioro MoM >= 5
-        mom = _last_two_months_nps(session, s.branch_id)
-        if mom is not None:
-            prev_nps, last_nps = mom
-            if (prev_nps - last_nps) >= 5.0:
-                conds.append(CONDITION_LABELS["mom_drop_5"])
+        drop = _mom_drop(s.branch_id)
+        if drop is not None and drop >= 5.0:
+            conds.append(CONDITION_LABELS["mom_drop_5"])
 
         if conds:
             items.append(

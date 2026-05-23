@@ -17,7 +17,7 @@ from sqlalchemy import distinct, select
 from sqlalchemy.orm import Session
 
 from .nps import branch_ytd_summary
-from .ranking import critical_branches
+from .ranking import _branch_snapshots, critical_branches
 from .schemas import CauseBucket, CriticalBranch, StrengthBucket, SuggestedAction
 from .topics import top_causes, top_strengths
 
@@ -61,12 +61,10 @@ def _build_national_context(session: Session) -> _Context:
     ).scalars().all()
     neg_personnel = [str(b) for b in rows_personnel]
 
-    # Branches con gap < -10
-    wide_gap: list[str] = []
-    for bid in branch_ids:
-        summary = branch_ytd_summary(session, str(bid))
-        if summary.gap is not None and summary.gap < -10:
-            wide_gap.append(str(bid))
+    # Branches con gap < -10. Usa _branch_snapshots (1 query agregada)
+    # en vez de iterar branch_ytd_summary por sucursal (1298 × 2 queries → 29s).
+    snapshots = _branch_snapshots(session)
+    wide_gap = [s.branch_id for s in snapshots if s.gap is not None and s.gap < -10]
 
     return _Context(
         scope="national",

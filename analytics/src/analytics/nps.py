@@ -83,6 +83,33 @@ def _ytd_filter_year(session: Session) -> int | None:
     return _max_year(session)
 
 
+def _nps_from_counts(counts: dict[str, int]) -> tuple[float, int, NPSDistribution]:
+    """Compute NPS, total y distribution a partir de un dict {nps_group: count}.
+
+    Equivalente a aplicar `compute_nps`/`compute_distribution` a un iterable,
+    pero sin materializar las filas (las analytics nacionales escaneaban 473k
+    ORM objects sólo para contar 3 categorías — esto lo evita).
+    """
+    p = int(counts.get("Promotor", 0))
+    pa = int(counts.get("Pasivo", 0))
+    d = int(counts.get("Detractor", 0))
+    total = p + pa + d
+    nps = ((p - d) / total * 100.0) if total > 0 else 0.0
+    if total == 0:
+        dist = NPSDistribution(
+            promoters_pct=0.0, passives_pct=0.0, detractors_pct=0.0,
+            promoters_count=0, passives_count=0, detractors_count=0,
+        )
+    else:
+        dist = NPSDistribution(
+            promoters_pct=p / total * 100.0,
+            passives_pct=pa / total * 100.0,
+            detractors_pct=d / total * 100.0,
+            promoters_count=p, passives_count=pa, detractors_count=d,
+        )
+    return nps, total, dist
+
+
 def national_ytd_summary(session: Session) -> NPSSummary:
     """NPS nacional YTD sobre el año más reciente disponible.
 
@@ -98,11 +125,13 @@ def national_ytd_summary(session: Session) -> NPSSummary:
             total_responses=0,
             distribution=compute_distribution([]),
         )
-    rows = session.execute(
-        select(Verbalization).where(Verbalization.response_year == year)
-    ).scalars().all()
-    actual = compute_nps(rows)
-    distribution = compute_distribution(rows)
+    grouped = session.execute(
+        select(Verbalization.nps_group, func.count())
+        .where(Verbalization.response_year == year)
+        .group_by(Verbalization.nps_group)
+    ).all()
+    counts = {str(g): int(c) for g, c in grouped}
+    actual, total, distribution = _nps_from_counts(counts)
 
     target_avg = session.execute(
         select(func.avg(BranchTarget.nps_target_annual))
@@ -113,7 +142,7 @@ def national_ytd_summary(session: Session) -> NPSSummary:
         nps_actual=actual,
         nps_target=nps_target,
         gap=gap,
-        total_responses=len(rows),
+        total_responses=total,
         distribution=distribution,
     )
 
@@ -129,14 +158,16 @@ def branch_ytd_summary(session: Session, branch_id: str) -> NPSSummary:
             total_responses=0,
             distribution=compute_distribution([]),
         )
-    rows = session.execute(
-        select(Verbalization).where(
+    grouped = session.execute(
+        select(Verbalization.nps_group, func.count())
+        .where(
             Verbalization.response_year == year,
             Verbalization.branch_id == branch_id,
         )
-    ).scalars().all()
-    actual = compute_nps(rows)
-    distribution = compute_distribution(rows)
+        .group_by(Verbalization.nps_group)
+    ).all()
+    counts = {str(g): int(c) for g, c in grouped}
+    actual, total, distribution = _nps_from_counts(counts)
 
     target_val = session.execute(
         select(BranchTarget.nps_target_annual).where(
@@ -148,7 +179,7 @@ def branch_ytd_summary(session: Session, branch_id: str) -> NPSSummary:
             nps_actual=actual,
             nps_target=None,
             gap=None,
-            total_responses=len(rows),
+            total_responses=total,
             distribution=distribution,
         )
     nps_target = float(cast(int, target_val))
@@ -156,6 +187,6 @@ def branch_ytd_summary(session: Session, branch_id: str) -> NPSSummary:
         nps_actual=actual,
         nps_target=nps_target,
         gap=actual - nps_target,
-        total_responses=len(rows),
+        total_responses=total,
         distribution=distribution,
     )
