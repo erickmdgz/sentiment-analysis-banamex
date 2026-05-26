@@ -281,25 +281,44 @@ def _parse_month(month_str: str) -> tuple[int, int]:
 def _branch_delta_between_months(
     session: Session, month_a: str, month_b: str
 ) -> list[tuple[str, float]]:
-    """Lista de (branch_id, delta_nps) entre month_b y month_a (b − a)."""
+    """Lista de (branch_id, delta_nps) entre month_b y month_a (b − a).
+
+    Antes: 1 query por sucursal × 1298 sucursales × 2 meses = 2596 queries
+    materializando rows en Python (~19s para /national/compare).
+    Ahora: 2 queries agregadas (1 por mes) sobre (branch_id, nps_group).
+    """
     ya, ma = _parse_month(month_a)
     yb, mb = _parse_month(month_b)
-    # Branches presentes en cualquiera de los dos meses
-    branch_ids = session.execute(
-        select(Verbalization.branch_id)
-        .where(
-            ((Verbalization.response_year == ya) & (Verbalization.response_month == ma))
-            | (
-                (Verbalization.response_year == yb)
-                & (Verbalization.response_month == mb)
+
+    def _branch_counts_for(year: int, month: int) -> dict[str, dict[str, int]]:
+        result: dict[str, dict[str, int]] = {}
+        for bid, group, cnt in session.execute(
+            select(
+                Verbalization.branch_id,
+                Verbalization.nps_group,
+                func.count(),
             )
-        )
-        .group_by(Verbalization.branch_id)
-    ).scalars().all()
+            .where(
+                Verbalization.response_year == year,
+                Verbalization.response_month == month,
+            )
+            .group_by(Verbalization.branch_id, Verbalization.nps_group)
+        ).all():
+            result.setdefault(str(bid), {})[str(group)] = int(cnt)
+        return result
+
+    def _nps_of(counts: dict[str, int]) -> float | None:
+        p = int(counts.get("Promotor", 0))
+        d = int(counts.get("Detractor", 0))
+        total = p + int(counts.get("Pasivo", 0)) + d
+        return (p - d) / total * 100.0 if total > 0 else None
+
+    counts_a = _branch_counts_for(ya, ma)
+    counts_b = _branch_counts_for(yb, mb)
     out: list[tuple[str, float]] = []
-    for bid in branch_ids:
-        nps_a = _branch_nps_for_month(session, bid, ya, ma)
-        nps_b = _branch_nps_for_month(session, bid, yb, mb)
+    for bid in set(counts_a) | set(counts_b):
+        nps_a = _nps_of(counts_a.get(bid, {}))
+        nps_b = _nps_of(counts_b.get(bid, {}))
         if nps_a is None or nps_b is None:
             continue
         out.append((bid, nps_b - nps_a))

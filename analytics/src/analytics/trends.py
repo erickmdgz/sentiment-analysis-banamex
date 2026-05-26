@@ -9,10 +9,10 @@ from collections.abc import Iterable
 from typing import Literal
 
 from core.models_db import Verbalization
-from sqlalchemy import distinct, select
+from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
-from .nps import compute_distribution, compute_nps
+from .nps import _nps_from_counts, compute_distribution, compute_nps
 from .ranking import branches_improved, branches_worsened
 from .schemas import (
     CauseBucket,
@@ -59,24 +59,32 @@ def monthly_trend(
 
     Cada punto incluye `responses`. La capa de presentación decide si oculta
     puntos con `responses < PARTIAL_THRESHOLD`.
+
+    Agregación en SQL (en vez de materializar 473k rows en Python) — bajó
+    el endpoint de ~2.5s a sub-segundo sobre el dataset real.
     """
     branch_filter = _filter_scope(scope)
-    stmt = select(Verbalization)
+    stmt = select(
+        Verbalization.response_year,
+        Verbalization.response_month,
+        Verbalization.nps_group,
+        func.count(),
+    ).group_by(
+        Verbalization.response_year,
+        Verbalization.response_month,
+        Verbalization.nps_group,
+    )
     if branch_filter is not None:
         stmt = stmt.where(Verbalization.branch_id == branch_filter)
-    rows = session.execute(stmt).scalars().all()
-    buckets: dict[tuple[int, int], list[Verbalization]] = {}
-    for r in rows:
-        key = (int(r.response_year), int(r.response_month))
-        buckets.setdefault(key, []).append(r)
-    points = [
-        MonthlyPoint(
-            month=_format_month(y, m),
-            nps=compute_nps(items),
-            responses=len(items),
+    by_month: dict[tuple[int, int], dict[str, int]] = {}
+    for y, m, g, c in session.execute(stmt).all():
+        by_month.setdefault((int(y), int(m)), {})[str(g)] = int(c)
+    points = []
+    for (y, m), counts in sorted(by_month.items()):
+        nps, total, _ = _nps_from_counts(counts)
+        points.append(
+            MonthlyPoint(month=_format_month(y, m), nps=nps, responses=total)
         )
-        for (y, m), items in sorted(buckets.items())
-    ]
     return MonthlyTrend(points=points)
 
 
@@ -125,15 +133,27 @@ def compare_months(
     # Para evitar import circular con topics.py, lo importamos aquí.
     from .topics import top_causes, top_strengths  # noqa: WPS433
 
-    records = _scope_records(session, scope)
+    branch_filter = _filter_scope(scope)
     ya, ma = _parse_month_str(month_a)
     yb, mb = _parse_month_str(month_b)
-    rows_a = _month_filter(records, ya, ma)
-    rows_b = _month_filter(records, yb, mb)
-    nps_a = compute_nps(rows_a)
-    nps_b = compute_nps(rows_b)
-    dist_a: NPSDistribution = compute_distribution(rows_a)
-    dist_b: NPSDistribution = compute_distribution(rows_b)
+
+    def _counts_for(year: int, month: int) -> dict[str, int]:
+        # Agregación SQL en vez de cargar 473k rows + filtrar Python (antes
+        # tardaba ~24s para el scope nacional; ahora sub-segundo).
+        stmt = (
+            select(Verbalization.nps_group, func.count())
+            .where(
+                Verbalization.response_year == year,
+                Verbalization.response_month == month,
+            )
+            .group_by(Verbalization.nps_group)
+        )
+        if branch_filter is not None:
+            stmt = stmt.where(Verbalization.branch_id == branch_filter)
+        return {str(g): int(c) for g, c in session.execute(stmt).all()}
+
+    nps_a, _, dist_a = _nps_from_counts(_counts_for(ya, ma))
+    nps_b, _, dist_b = _nps_from_counts(_counts_for(yb, mb))
 
     causes_a = top_causes(session, scope, group="Detractor", month=month_a)
     causes_b = top_causes(session, scope, group="Detractor", month=month_b)
