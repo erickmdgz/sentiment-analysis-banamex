@@ -11,15 +11,15 @@ tags:
 >
 > Para visualización dinámica del grafo módulos / estados / dependencias en Obsidian (requiere Dataview), abre [[DASHBOARD]].
 
-**Última actualización:** 2026-05-21 (Etapa 3 cerrada — PR #8 mergeado tras añadir 3 tests del parser date-first faltantes en el review)
-**Main HEAD:** `bb59335` (Merge pull request #8 from erickmdgz/feat/m6-integration)
+**Última actualización:** 2026-05-25 (bring-up E2E completo — pipeline corrido sobre corpus real, dashboard validado, distribuible `nps.db.gz` generado, tag `v0.1.0-demo`)
+**Main HEAD:** `aa9596f` (feat(scripts): start.sh para levantar el stack en un comando)
 **Convención de actualización:** Claude actualiza este archivo después de cada milestone (cerrar PR, cerrar etapa, tomar decisión de contrato, descubrir convención operacional). Commit `docs(estado): ...`.
 
 ---
 
 ## Etapa actual
 
-**Etapa 3 — Completa. MVP cerrado.** M6 integró todo: `docker-compose.yml`, scripts (`preprocess_corpora`, `seed_db`, `smoke_test`, `generate_openapi_client`), `README_DEMO.md`. El flujo end-to-end se verificó localmente: `docker compose up` levanta API + Web sanos, `bash scripts/smoke_test.sh` pasa contra el stack vivo (473,771 verbalizaciones cargadas, 1,298 sucursales, 24 meses cubiertos). Antes de mergear se añadieron 3 tests sintéticos al parser cubriendo el orden date-first + header skip (huecos identificados en el code review).
+**Operativo. MVP validado E2E.** Todas las etapas codificadas (M1-M6, PR #1-#8) más el bring-up real: pipeline corrido sobre los 473,771 registros del corpus, clasificador entrenado y aplicado al 100%, dashboard verificado en navegador con datos reales en las 7 pantallas. Distribuible `data/processed/nps.db.gz` generado (128 MB). Tag `v0.1.0-demo` creado.
 
 Plan de orquestación completo: `~/.claude/plans/nuestro-plan-de-implementaci-n-misty-walrus.md` (no se versiona — vive en config local de Claude).
 
@@ -29,7 +29,65 @@ Etapa 0   ✓  Setup de contratos y stubs                           (PR #1 → 9
 Etapa 1   ✓  M1, M2a, M3, M5 paralelos                            (PRs #2/3/4/5)
 Etapa 2   ✓  M2b, M4 paralelos                                    (PRs #7/6)
 Etapa 3   ✓  M6 integración Docker + scripts + demo               (PR #8 → bb59335)
+Bring-up  ✓  Pipeline E2E sobre corpus real + dashboard validado  (tag v0.1.0-demo)
 ```
+
+---
+
+## Bring-up E2E (2026-05-21 → 2026-05-25)
+
+Plan operativo: `~/.claude/plans/este-proyecto-no-va-compiled-curry.md` (no versionado).
+
+### Tiempos efectivos por fase
+
+| Fase | Duración | Notas |
+|---|---|---|
+| 0 — Pre-flight (instalar Ollama + pull modelo + venv) | ~15 min | Instalado `qwen2.5:7b-instruct` (4.7 GB) |
+| 2 — Fix trainer (validar `annotation_run_id`) | minutos | Commit `9eaabce` |
+| 3.1 — `init_schema` + `load_corpora` | <1 min | 473,771 verbalizations, 3 archivos |
+| 3.2 — `generate_targets` | segundos | 1,298 sucursales |
+| 3.3 — `extract_metadata` | 30 seg | 369,568 metadata_extractions |
+| 3.4 — `annotate` con Ollama (5,000 muestras) | **5h 56min** | `concurrency=3`. La GPU Metal del M5 Pro procesa secuencialmente — subir HTTP concurrency NO acelera (Ollama serializa internamente) |
+| 3.5 — `train` (LogisticRegression OvR + MiniLM-L12 embeddings) | 11 seg | 60 labels, 4,989 muestras |
+| 3.6 — `predict_all` (468k restantes) | **11h 22min** | Rate degradado de 24→6 rec/s conforme la BD crece (índices) |
+| 4 — Stack vivo + 7 pantallas con datos reales | manual | Requirió 3 rounds de optimización de queries; ver "Bugs/perf descubiertos" |
+| 5 — Cierre (distribuible + tag + ESTADO) | 10 min | |
+
+### Métricas finales
+
+- **Cobertura clasificación**: 473,771 / 473,771 (100%)
+- **Distribución `classifications.source`**: classifier=1,058,994 · fallback=108,081 · llm_annotation=8,351 (1.18M filas; multilabel ~2.5 etiquetas por record)
+- **Modelo (`data/models/classifier.joblib`, 193 KB)**: `f1_micro=0.436`, `f1_macro=0.153`, 60 labels (L1+L2), 4,989 muestras
+- **Distribuible (`data/processed/nps.db.gz`)**: 128 MB · `sha256 4114cb8792e0874c3394f1a6502644c0312b52707a4c1767f10c429272b5daf3`
+- **Tag**: `v0.1.0-demo`
+
+### Bugs / perf descubiertos durante el bring-up (cada uno con commit propio)
+
+| Hash | Tipo | Descripción |
+|---|---|---|
+| `9eaabce` | fix | `engine.trainer.train` no validaba `annotation_run_id` — un ID inválido reventaba tras 30+ min con `IntegrityError` opaco |
+| `01ecbd7` | fix | `engine.annotator._preflight` usaba el formato dict de `ollama-python <0.5`; la versión 0.6.2 devuelve `ListResponse` Pydantic con `Model.model` (no `.name`). Sin esto el annotate fallaba con "modelo no encontrado" aunque estuviera pulled |
+| `b8b94ed` | perf | `analytics.nps` / `analytics.ranking` / `analytics.actions` materializaban 473k ORM objects en Python para contar 3 categorías. `/national/ytd` tardaba >90s (timeout). Refactor a agregación SQL (`GROUP BY` + `COUNT`) — bajó a 19s |
+| `29a2d70` | perf | Mismo patrón en `trends.compare_months`, `trends.monthly_trend`, `ranking._branch_delta_between_months`. `/national/compare` tardaba 23s → 8s; `/branches/{id}/compare` 19s → 7s |
+| `aa9596f` | feat | `scripts/start.sh` — un comando para levantar el stack desde cero |
+
+### Hallazgos operativos
+
+- **Ollama daemon**: el plist de `brew services start ollama` se carga pero queda en `Schedulable: false` (problema de permisos macOS). Workaround: `nohup ollama serve > logs/ollama.log 2>&1 &`.
+- **GPU saturada por modelo**: subir `OLLAMA_NUM_PARALLEL` o HTTP concurrency NO acelera el LLM — la GPU es el cuello de botella. Con M5 Pro / qwen2.5:7b-Q4_K_M el throughput estable es ~0.23 rec/s, independiente de concurrencia.
+- **SQLite con índices crecientes**: la rate de `predict-all` baja de 24 a 6 rec/s a lo largo de 11h conforme la tabla `classifications` (1.2M filas) crece y los inserts pagan más índices. Aceptable para local.
+- **Patrón anti-perf en analytics**: 5 funciones materializaban masas de rows en Python para hacer agregaciones triviales. Bajo "no es para producción" igual hubo que fixearlas porque el dashboard era inusable. Si aparecen pantallas nuevas lentas, primer sospechoso: `select(Model).where(...).scalars().all()` sobre tabla grande.
+
+### Cómo regenerar el `nps.db.gz`
+
+Si los corpora cambian o se re-entrena el modelo: tras correr `python scripts/preprocess_corpora.py` por completo:
+
+```bash
+gzip -c data/processed/banamex.db > data/processed/nps.db.gz
+shasum -a 256 data/processed/nps.db.gz
+```
+
+El receptor del `.gz` lo coloca en `data/processed/` y lo renombra a `banamex.db.gz` antes de correr `python scripts/seed_db.py` (el script busca ese nombre — decisión de alcance mínimo).
 
 ---
 
