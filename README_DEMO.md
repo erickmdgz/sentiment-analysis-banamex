@@ -53,9 +53,14 @@ cp /ruta/donde/recibiste/banamex.db.gz data/processed/
 # Extraer la DB.
 python scripts/seed_db.py
 
-# Levantar todo el stack (API + Web).
-docker compose up --build
+# Levantar todo el stack (API + Web) en un solo comando.
+bash scripts/start.sh
 ```
+
+> El script `start.sh` se encarga de lanzar Docker Desktop si está apagado,
+> hacer `docker compose up -d`, esperar a que la API esté lista y validar
+> que el clasificador esté cargado. Alternativa equivalente: `docker compose
+> up --build` (más verbose; útil si quieres ver los logs en vivo).
 
 Cuando veas en los logs algo como:
 
@@ -74,7 +79,7 @@ Haz login con **cualquier usuario y contraseña** (el MVP no valida credenciales
 contra ninguna base; cualquier combinación devuelve un token válido). Llegarás
 directo a la vista nacional con datos cargados.
 
-Para detener el stack: `Ctrl+C` y luego `docker compose down`.
+Para detener el stack: `bash scripts/start.sh --stop` (o `docker compose down`).
 
 ---
 
@@ -104,7 +109,7 @@ pip install -e ./core ./engine ./analytics ./api
 python scripts/preprocess_corpora.py
 
 # 6. Levantar el stack como en el Quick start anterior.
-docker compose up --build
+bash scripts/start.sh
 ```
 
 El script `preprocess_corpora.py` es **idempotente**: si lo cortas a la mitad y

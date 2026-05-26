@@ -35,6 +35,7 @@ sentiment-analysis-banamex/
 ├── api/                      # FastAPI: 31 endpoints (auth + upload + national + branches + admin + healthz)
 ├── web/                      # SPA React (7 pantallas)
 ├── scripts/
+│   ├── start.sh              # Atajo para levantar el stack (docker compose up -d + health check)
 │   ├── preprocess_corpora.py # Orquestador idempotente: load → annotate → train → predict
 │   ├── seed_db.py            # Descomprime banamex.db.gz a data/processed/
 │   ├── smoke_test.sh         # Probes E2E contra el stack vivo
@@ -62,9 +63,12 @@ python -m pytest engine/tests
 python -m pytest analytics/tests
 python -m pytest api/tests
 
-# Levantar stack completo (requiere Docker daemon).
-docker compose up -d
+# Levantar stack completo (atajo recomendado: lanza Docker si está apagado,
+# espera health, valida classifier_loaded, imprime URLs y credenciales).
+bash scripts/start.sh
+# Equivalente manual: docker compose up -d
 bash scripts/smoke_test.sh        # Smoke E2E
+bash scripts/start.sh --stop      # Bajar el stack
 # Web en http://localhost:3000  ·  API en http://localhost:8000  ·  /docs en http://localhost:8000/docs
 
 # Pipeline completo desde corpora crudos (lento; requiere Ollama si no se usa --skip-llm).
